@@ -1,0 +1,133 @@
+:root {
+    --primary-color: #3b82f6;
+    --primary-hover: #2563eb;
+    --light-blue: #eff6ff;
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --border-color: #e2e8f0;
+}
+
+.back-link {
+    color: var(--primary-color);
+    font-weight: 500;
+    display: inline-flex;
+    align-items-center;
+}
+
+.back-link:hover {
+    color: var(--primary-hover);
+}
+
+.card {
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border-color: #dbeafe;
+}
+
+.card-header {
+    border-top-left-radius: 1rem !important;
+    border-top-right-radius: 1rem !important;
+}
+
+.logo-text {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    font-weight: 500;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+.btn-primary:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+}
+
+.form-control.is-invalid {
+    border-color: var(--red);
+}
+
+.invalid-feedback {
+    color: var(--red);
+    font-size: 0.875rem;
+    display: block;
+}
+
+.username-input {
+    position: relative;
+}
+
+.username-status {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+
+.input-group-text {
+    background-color: #f8fafc;
+    border-color: var(--border-color);
+}
+
+.btn-outline-secondary {
+    border-color: var(--border-color);
+    color: #6b7280;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #f8fafc;
+    border-color: var(--border-color);
+    color: #1e293b;
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.text-success {
+    color: var(--green) !important;
+}
+
+.text-danger {
+    color: var(--red) !important;
+}
+
+.text-warning {
+    color: var(--yellow) !important;
+}
+
+.card-footer {
+    border-bottom-left-radius: 1rem !important;
+    border-bottom-right-radius: 1rem !important;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.5rem !important;
+    }
+}

@@ -1,0 +1,116 @@
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top bg-primary">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+            <img src="/images/logos/Addventure_logo_blanco.ico" alt="logo_addventure" 
+                 style="width: 32px; height: 32px;" class="me-2">
+            <span>AddVenture</span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- NAVEGACION PRINCIPAL -->
+            <ul class="navbar-nav flex-grow-1 justify-content-center">
+                <!-- ENLACES PARA USUARIO AUTENTICADO -->
+                @if (isAuthenticated) {
+                    <li class="nav-item">
+                        <a class="nav-link" href="http://localhost:8080/grupos">Buscar Grupos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="http://localhost:8080/grupos/mis-viajes">Mis Viajes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="http://localhost:8080/crear-grupo">Crear Grupo</a>
+                    </li>
+                } @else {
+                    <!-- ENLACES PARA USUARIO NO AUTENTICADO -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#como-funciona">Cómo Funciona</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#destinos">Destinos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#testimonios">Testimonios</a>
+                    </li>
+                }
+            </ul>
+
+            <!-- SECCION DERECHA: CUENTA Y ACCIONES -->
+            <div class="d-flex align-items-center gap-3">
+                <!-- USUARIO AUTENTICADO -->
+                @if (isAuthenticated && homeData) {
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- Notificaciones -->
+                        <a href="http://localhost:8080/notificaciones" class="position-relative text-white text-decoration-none">
+                            <i class="bi bi-bell fs-5"></i>
+                            @if (homeData.notificacionesNoLeidas > 0) {
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {{ homeData.notificacionesNoLeidas }}
+                                </span>
+                            }
+                        </a>
+
+                        <!-- Dropdown del usuario -->
+                        <div class="dropdown">
+                            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-white"
+                               id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="avatar-circle bg-light text-primary fw-bold me-2">
+                                    @if (homeData.imagenPerfil) {
+                                        <img [src]="'http://localhost:8080' + homeData.imagenPerfil" 
+                                             alt="Perfil actual">
+                                    } @else {
+                                        <span class="fs-3 fw-medium">{{ homeData.iniciales }}</span>
+                                    }
+                                </div>
+
+                                <div class="d-none d-md-block text-start">
+                                    <small class="d-block opacity-75">Hola,</small>
+                                    <strong>{{ homeData.username }}</strong>
+                                </div>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" 
+                                       href="http://localhost:8080/perfil">
+                                        <i class="bi bi-person"></i> Mi Perfil
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" 
+                                       href="http://localhost:8080/perfil/configuracion">
+                                        <i class="bi bi-gear"></i> Configuración
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" 
+                                       href="http://localhost:8080/support">
+                                        <i class="bi bi-question-circle"></i> Ayuda
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <button class="dropdown-item d-flex align-items-center gap-2 text-danger" 
+                                            (click)="logout()" type="button">
+                                        <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                } @else {
+                    <!-- USUARIO NO AUTENTICADO -->
+                    <div class="d-flex align-items-center gap-2">
+                        <a routerLink="/registro" class="btn btn-light btn-sm">Crear Cuenta</a>
+                        <a routerLink="/login" class="btn btn-outline-light btn-sm d-flex align-items-center gap-2">
+                            <span>Iniciar Sesión</span>
+                            <i class="fas fa-sign-in-alt"></i>
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</nav>
