@@ -165,7 +165,7 @@ h1 {
 
 .back-link {
     display: inline-flex;
-    align-items-center;
+    align-items: center;
     color: var(--primary-color);
     text-decoration: none;
     margin-bottom: 1.5rem;
@@ -188,7 +188,7 @@ h1 {
     .card-body {
         padding: 1.5rem;
     }
-    
+
     .login-container {
         padding: 1rem;
     }
