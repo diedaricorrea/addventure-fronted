@@ -90,7 +90,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadHomeData();
-    
+
     // Suscribirse a cambios de autenticación
     this.authSubscription = this.authService.currentUser$.subscribe(user => {
       // Recargar datos cuando cambia el estado de autenticación
@@ -134,7 +134,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   initFadeAnimations(): void {
     const fadeElements = document.querySelectorAll('.fade-in');
-    
+
     const fadeInObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
