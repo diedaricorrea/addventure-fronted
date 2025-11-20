@@ -3,14 +3,14 @@
 
 <!-- Hero Section -->
 <section class="hero-section">
-    <img src="/images/img02.jpg" alt="Personas disfrutando de un viaje en montaña" 
+    <img src="images/img02.jpg" alt="Personas disfrutando de un viaje en montaña" 
          class="w-100 h-100 position-absolute object-fit-cover">
     <div class="hero-content">
         <span class="hero-badge">¡Nuevo! Grupos verificados</span>
         <h1 class="display-4 fw-bold mb-4">Viajar es mejor en compañía</h1>
         <p class="lead mb-4">Encuentra personas que comparten tu pasión por explorar el mundo. Únete a grupos de viaje o crea el tuyo propio.</p>
         <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
-            <a href="http://localhost:8080/grupos" class="btn btn-primary btn-lg">Explorar Grupos</a>
+            <a routerLink="/grupos" class="btn btn-primary btn-lg">Explorar Grupos</a>
             <a href="#como-funciona" class="btn btn-outline-light btn-lg">Ver Cómo Funciona</a>
         </div>
         <div class="mt-4 d-flex justify-content-center gap-3">
@@ -155,21 +155,42 @@
 
         <div class="card p-4 mb-4 fade-in">
             <div class="destination-carousel position-relative">
-                <div class="carousel-control prev">
+                <div class="carousel-control prev" (click)="prevSlide()">
                     <i class="fas fa-chevron-left"></i>
                 </div>
 
-                <div class="carousel-container">
-                    <!-- Destinations will be added dynamically with JavaScript -->
+                <div class="carousel-container" [style.transform]="getCarouselTransform()">
+                    @for (destination of destinations; track destination.id) {
+                        <div class="col-12 col-md-3 px-2" [style.min-width]="'25%'">
+                            <div class="destination-card">
+                                <div class="destination-img" [style.background-image]="'url(' + destination.image + ')'">
+                                    <span class="destination-country">
+                                        <i class="fas fa-map-marker-alt me-1"></i> {{ destination.country }}
+                                    </span>
+                                    <span class="destination-tag" [ngClass]="destination.tagColor">{{ destination.tag }}</span>
+                                </div>
+                                <div class="p-3">
+                                    <h3 class="h5 fw-bold mb-1">{{ destination.name }}</h3>
+                                    <p class="small text-muted mb-3">{{ destination.dates }}</p>
+                                    <a routerLink="/grupos" class="btn btn-outline-primary btn-sm w-100">Ver grupos</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
                 </div>
 
-                <div class="carousel-control next">
+                <div class="carousel-control next" (click)="nextSlide()">
                     <i class="fas fa-chevron-right"></i>
                 </div>
             </div>
 
             <div class="carousel-indicators mt-3">
-                <!-- Indicators will be added dynamically with JavaScript -->
+                @for (slide of [].constructor(totalSlides); track $index) {
+                    <div class="carousel-indicator" 
+                         [class.active]="currentSlide === $index"
+                         (click)="goToSlide($index)">
+                    </div>
+                }
             </div>
         </div>
     </div>
@@ -345,14 +366,14 @@
 
 <!-- CTA Section -->
 <section class="cta-section">
-    <img src="/images/aventurero.jpg" alt="Persona mirando montañas" 
+    <img src="images/aventurero.jpg" alt="Persona mirando montañas" 
          class="w-100 h-100 position-absolute object-fit-cover">
     <div class="cta-content fade-in">
         <h2 class="display-5 fw-bold mb-3">¿Listo para tu próxima aventura?</h2>
         <p class="lead mb-4">
             Miles ya están viajando en grupo gracias a AddVenture. Ahora te toca a ti vivir una experiencia única.
         </p>
-        <a href="http://localhost:8080/grupos" class="btn btn-light btn-lg px-5">Empezar ahora</a>
+        <a routerLink="/grupos" class="btn btn-light btn-lg px-5">Empezar ahora</a>
     </div>
 </section>
 
