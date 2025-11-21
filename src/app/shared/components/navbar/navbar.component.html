@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark sticky-top bg-primary">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center" href="/">
-            <img src="/images/logos/Addventure_logo_blanco.ico" alt="logo_addventure" 
+            <img src="/images/logos/Addventure_logo_blanco.ico" alt="logo_addventure"
                  style="width: 32px; height: 32px;" class="me-2">
             <span>AddVenture</span>
         </a>
@@ -59,7 +59,7 @@
                                id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                 <div class="avatar-circle bg-light text-primary fw-bold me-2">
                                     @if (homeData.imagenPerfil) {
-                                        <img [src]="'http://localhost:8080' + homeData.imagenPerfil" 
+                                        <img [src]="'http://localhost:8080' + homeData.imagenPerfil"
                                              alt="Perfil actual">
                                     } @else {
                                         <span class="fs-3 fw-medium">{{ homeData.iniciales }}</span>
@@ -73,26 +73,26 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
                                 <li>
-                                    <a class="dropdown-item d-flex align-items-center gap-2" 
-                                       href="http://localhost:8080/perfil">
+                                    <a class="dropdown-item d-flex align-items-center gap-2"
+                                       routerLink="/perfil">
                                         <i class="bi bi-person"></i> Mi Perfil
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item d-flex align-items-center gap-2" 
+                                    <a class="dropdown-item d-flex align-items-center gap-2"
                                        href="http://localhost:8080/perfil/configuracion">
                                         <i class="bi bi-gear"></i> Configuración
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item d-flex align-items-center gap-2" 
+                                    <a class="dropdown-item d-flex align-items-center gap-2"
                                        href="http://localhost:8080/support">
                                         <i class="bi bi-question-circle"></i> Ayuda
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <button class="dropdown-item d-flex align-items-center gap-2 text-danger" 
+                                    <button class="dropdown-item d-flex align-items-center gap-2 text-danger"
                                             (click)="logout()" type="button">
                                         <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
                                     </button>

@@ -1,0 +1,425 @@
+<div *ngIf="loading" class="container mt-5 text-center">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Cargando...</span>
+  </div>
+</div>
+
+<div *ngIf="error" class="container mt-5">
+  <div class="alert alert-danger" role="alert">
+    {{ error }}
+  </div>
+</div>
+
+<div *ngIf="!loading && perfil">
+  <!-- Botón Volver (solo para perfiles de otros usuarios) -->
+  <div *ngIf="!perfil.esPerfilPropio" class="container mt-3">
+    <button (click)="goBack()" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left me-2"></i>Volver
+    </button>
+  </div>
+
+  <!-- Portada Usuario -->
+  <div class="position-relative cover-container">
+    <img [src]="getImageUrl(perfil.imagenPortada)" alt="Portada" class="cover-image">
+    <div class="cover-overlay"></div>
+  </div>
+
+  <!-- Profile Content -->
+  <div class="container profile-container">
+    <div class="bg-white rounded-4 shadow p-4 p-md-5">
+      <!-- Profile Header -->
+      <div class="row g-4">
+        <div class="col-md-auto">
+          <div class="avatar-container">
+            <img *ngIf="perfil.imagenPerfil" [src]="getImageUrl(perfil.imagenPerfil)" alt="Imagen de perfil" />
+            <div class="avatar-content" *ngIf="!perfil.imagenPerfil">{{ perfil.iniciales }}</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+            <div>
+              <div class="d-flex align-items-center gap-2">
+                <h1 class="fs-2 fw-bold mb-0">{{ perfil.nombre }} {{ perfil.apellidos }}</h1>
+                <!-- Mostrar etiqueta verificado -->
+                <span *ngIf="perfil.verificado" 
+                      class="badge bg-success d-flex align-items-center gap-1"
+                      title="Usuario verificado por la comunidad (5+ reseñas positivas)">
+                  <i class="bi bi-shield-check-fill"></i> Verificado
+                </span>
+              </div>
+              <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-2 mt-1">
+                <p class="text-muted mb-0">&#64;{{ perfil.username }}</p>
+                <div class="d-flex align-items-center gap-2 small text-muted">
+                  <i class="bi bi-geo-alt"></i>
+                  <span>{{ perfil.ciudad }}, {{ perfil.pais }}</span>
+                </div>
+                <div class="d-flex align-items-center">
+                  <div class="stars-container">
+                    <i class="bi bi-star-fill text-warning"></i>
+                    <i class="bi bi-star-fill text-warning"></i>
+                    <i class="bi bi-star-fill text-warning"></i>
+                    <i class="bi bi-star-fill text-warning"></i>
+                    <i class="bi bi-star-half text-warning"></i>
+                  </div>
+                  <span class="small text-muted ms-1">({{ perfil.promedioCalificaciones }})</span>
+                </div>
+              </div>
+              <div class="mt-3 d-flex flex-wrap gap-2">
+                <span class="badge rounded-pill bg-light text-dark border">
+                  <i class="bi bi-calendar"></i> Miembro desde {{ perfil.fechaRegistroFormateada }}
+                </span>
+                <span class="badge rounded-pill bg-light text-dark border">
+                  <i class="bi bi-star"></i> {{ perfil.totalResenas }} reseñas
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="d-flex align-items-center gap-4 mt-4 bg-light rounded-4 p-4 border">
+            <div class="d-flex align-items-center gap-3">
+              <div class="bg-primary bg-opacity-10 p-2 icon-circle-sm">
+                <i class="bi bi-geo-alt text-primary"></i>
+              </div>
+              <div>
+                <p class="fs-3 fw-bold mb-0">{{ perfil.viajesCompletados }}</p>
+                <p class="small text-muted mb-0">Viajes completados</p>
+              </div>
+            </div>
+            <div class="vr h-75"></div>
+            <div class="d-flex align-items-center gap-3">
+              <div class="bg-warning bg-opacity-10 p-2 icon-circle-sm">
+                <i class="bi bi-star text-warning"></i>
+              </div>
+              <div>
+                <p class="fs-3 fw-bold mb-0">{{ perfil.totalResenas }}</p>
+                <p class="small text-muted mb-0">Reseñas recibidas</p>
+              </div>
+            </div>
+            <div class="vr h-75"></div>
+            <div class="d-flex align-items-center gap-3">
+              <div class="bg-success bg-opacity-10 p-2 icon-circle-sm">
+                <i class="bi bi-trophy text-success"></i>
+              </div>
+              <div>
+                <p class="fs-3 fw-bold mb-0">{{ perfil.totalLogros }}</p>
+                <p class="small text-muted mb-0">Logros obtenidos</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <ul class="nav nav-pills mt-5" id="profileTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link d-flex align-items-center" 
+                  [class.active]="activeTab === 'perfil'"
+                  (click)="switchTab('perfil')"
+                  type="button">
+            <i class="bi bi-person me-2"></i> Perfil
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link d-flex align-items-center" 
+                  [class.active]="activeTab === 'viajes'"
+                  (click)="switchTab('viajes')"
+                  type="button">
+            <i class="bi bi-compass me-2"></i> Viajes
+          </button>
+        </li>
+      </ul>
+
+      <!-- Tab Content -->
+      <div class="tab-content mt-4" id="profileTabsContent">
+        <!-- Perfil Tab -->
+        <div class="tab-pane fade" [class.show]="activeTab === 'perfil'" [class.active]="activeTab === 'perfil'">
+          <div class="row g-4">
+            <!-- Sobre mí -->
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title mb-0">Sobre mí</h5>
+                </div>
+                <div class="card-body">
+                  <!-- Biografía si existe -->
+                  <p class="text-muted" *ngIf="perfil.biografia && perfil.biografia.trim()">
+                    {{ perfil.biografia }}
+                  </p>
+                  
+                  <!-- Mensaje cuando no hay biografía -->
+                  <p class="text-muted fst-italic" *ngIf="!perfil.biografia || !perfil.biografia.trim()">
+                    <span *ngIf="perfil.esPerfilPropio">Aún no has agregado una descripción a tu perfil.</span>
+                    <span *ngIf="!perfil.esPerfilPropio">Este usuario no ha agregado una descripción a su perfil.</span>
+                  </p>
+
+                  <div class="row mt-4 g-3">
+                    <!-- Email (solo mostrar si es perfil propio) -->
+                    <div class="col-md-6" *ngIf="perfil.esPerfilPropio && perfil.email">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-envelope text-muted"></i>
+                        <span>{{ perfil.email }}</span>
+                      </div>
+                    </div>
+                    <!-- Teléfono (solo mostrar si es perfil propio) -->
+                    <div class="col-md-6" *ngIf="perfil.esPerfilPropio && perfil.telefono">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-telephone text-muted"></i>
+                        <span>+51 {{ perfil.telefono }}</span>
+                      </div>
+                    </div>
+                    <!-- Ubicación (siempre mostrar) -->
+                    <div class="col-md-6">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-geo-alt text-muted"></i>
+                        <span>{{ perfil.ciudad }}, {{ perfil.pais }}</span>
+                      </div>
+                    </div>
+                    <!-- Edad (siempre mostrar si está disponible) -->
+                    <div class="col-md-6" *ngIf="perfil.edad">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-calendar text-muted"></i>
+                        <span>{{ perfil.edad }} años</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reseñas -->
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title mb-0">Reseñas de otros viajeros</h5>
+                  <p class="card-text small text-muted" *ngIf="perfil.totalResenas > 0">
+                    <i class="bi bi-star-fill text-warning me-1"></i>
+                    {{ perfil.promedioCalificaciones }} de 5 estrellas · 
+                    {{ perfil.totalResenas }} reseña<span *ngIf="perfil.totalResenas !== 1">s</span>
+                  </p>
+                  <p class="card-text small text-muted" *ngIf="perfil.totalResenas === 0">
+                    <span *ngIf="perfil.esPerfilPropio">Aún no tienes reseñas de otros viajeros.</span>
+                    <span *ngIf="!perfil.esPerfilPropio">Este usuario aún no tiene reseñas.</span>
+                  </p>
+                </div>
+                <div class="card-body" *ngIf="perfil.resenasRecientes && perfil.resenasRecientes.length > 0">
+                  <div class="d-flex flex-column gap-4">
+                    <!-- Reseñas dinámicas -->
+                    <div class="border rounded p-3" *ngFor="let resena of perfil.resenasRecientes">
+                      <div class="d-flex gap-3">
+                        <div class="review-avatar">{{ resena.autor.iniciales }}</div>
+                        <div class="flex-grow-1">
+                          <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
+                            <div>
+                              <h6 class="mb-0">{{ resena.autor.nombre }} {{ resena.autor.apellidos }}</h6>
+                              <p class="small text-muted mb-0">
+                                Viaje: {{ resena.grupo.nombreViaje }} · 
+                                {{ formatFecha(resena.fecha) }}
+                              </p>
+                            </div>
+                            <div class="stars-container mt-2 mt-sm-0">
+                              <!-- Estrellas dinámicas -->
+                              <i *ngFor="let filled of getStars(resena.calificacion)" 
+                                 [class]="filled ? 'bi bi-star-fill text-warning' : 'bi bi-star text-warning'"></i>
+                            </div>
+                          </div>
+                          <p class="mt-2 mb-0" *ngIf="resena.comentario && resena.comentario.trim()">
+                            {{ resena.comentario }}
+                          </p>
+                          <p class="mt-2 mb-0 text-muted fst-italic" *ngIf="!resena.comentario || !resena.comentario.trim()">
+                            Sin comentario adicional.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-body text-center py-5" *ngIf="!perfil.resenasRecientes || perfil.resenasRecientes.length === 0">
+                  <div class="text-muted">
+                    <i class="bi bi-star display-1 mb-3"></i>
+                    <h5 *ngIf="perfil.esPerfilPropio">¡Únete a viajes para recibir tus primeras reseñas!</h5>
+                    <h5 *ngIf="!perfil.esPerfilPropio">Este usuario aún no tiene reseñas</h5>
+                    <p *ngIf="perfil.esPerfilPropio">Participa en viajes y grupos para que otros viajeros puedan calificarte.</p>
+                  </div>
+                </div>
+                <div class="card-footer" *ngIf="perfil.totalResenas > 5">
+                  <button class="btn btn-outline-primary w-100">
+                    Ver todas las reseñas ({{ perfil.totalResenas }})
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Logros -->
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title mb-0">Logros</h5>
+                  <p class="card-text small text-muted" *ngIf="perfil.totalLogros > 0">
+                    {{ perfil.totalLogros }} logro<span *ngIf="perfil.totalLogros !== 1">s</span> obtenido<span *ngIf="perfil.totalLogros !== 1">s</span>
+                  </p>
+                  <p class="card-text small text-muted" *ngIf="perfil.totalLogros === 0">
+                    <span *ngIf="perfil.esPerfilPropio">Participa en viajes para obtener logros</span>
+                    <span *ngIf="!perfil.esPerfilPropio">Este usuario aún no tiene logros</span>
+                  </p>
+                </div>
+                <div class="card-body" *ngIf="perfil.logros && perfil.logros.length > 0">
+                  <div class="row g-3">
+                    <!-- Logros dinámicos -->
+                    <div class="col-sm-4" *ngFor="let logro of perfil.logros">
+                      <div class="d-flex align-items-center gap-3 border rounded p-3">
+                        <div class="badge-icon" [ngClass]="getLogroBadgeClass(logro.nombre)">
+                          <i [class]="logro.icono"></i>
+                        </div>
+                        <div>
+                          <h6 class="mb-0">{{ logro.nombre }}</h6>
+                          <p class="small text-muted mb-0">{{ logro.descripcion }}</p>
+                          <p class="small text-success mb-0">
+                            <i class="bi bi-calendar-check me-1"></i>
+                            {{ logro.fechaOtorgado | date: 'dd/MM/yyyy' }}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-body text-center py-5" *ngIf="!perfil.logros || perfil.logros.length === 0">
+                  <div class="text-muted">
+                    <i class="bi bi-trophy display-1 mb-3"></i>
+                    <h5 *ngIf="perfil.esPerfilPropio">¡Comienza tu aventura para obtener logros!</h5>
+                    <h5 *ngIf="!perfil.esPerfilPropio">Este usuario aún no tiene logros</h5>
+                    <p *ngIf="perfil.esPerfilPropio">
+                      Crea grupos, participa en viajes y obtén reseñas positivas para ganar insignias.
+                    </p>
+                    <div *ngIf="perfil.esPerfilPropio" class="mt-3">
+                      <small class="text-muted">
+                        <strong>Logros disponibles:</strong><br/>
+                        🏆 <strong>Pioneer:</strong> Completa tu primer viaje<br/>
+                        🗺️ <strong>Pathfinder:</strong> Crea tu primer grupo<br/>
+                        🛡️ <strong>Verificado:</strong> Obtén 5+ reseñas positivas
+                      </small>
+                    </div>
+                    <div *ngIf="perfil.esPerfilPropio" class="mt-3">
+                      <span class="badge bg-warning me-2"><i class="bi bi-flag me-1"></i>Pioneer</span>
+                      <span class="badge bg-primary me-2"><i class="bi bi-compass me-1"></i>Pathfinder</span>
+                      <span class="badge bg-success"><i class="bi bi-shield me-1"></i>Verificado</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-footer" *ngIf="perfil.totalLogros > 3">
+                  <button class="btn btn-outline-primary w-100">
+                    Ver todos los logros ({{ perfil.totalLogros }})
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Viajes Tab -->
+        <div class="tab-pane fade" [class.show]="activeTab === 'viajes'" [class.active]="activeTab === 'viajes'">
+          <div class="row g-4">
+            <!-- Próximos viajes -->
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title mb-0">Próximos viajes</h5>
+                  <p class="card-text small text-muted" *ngIf="perfil.totalProximosViajes > 0">
+                    {{ perfil.totalProximosViajes }} viaje<span *ngIf="perfil.totalProximosViajes !== 1">s</span> programado<span *ngIf="perfil.totalProximosViajes !== 1">s</span>
+                  </p>
+                </div>
+                <div class="card-body" *ngIf="perfil.proximosViajes && perfil.proximosViajes.length > 0">
+                  <div class="row g-3">
+                    <!-- Viajes dinámicos -->
+                    <div class="col-md-4" *ngFor="let grupo of perfil.proximosViajes">
+                      <a [routerLink]="['/grupos', grupo.idGrupo]" class="text-decoration-none">
+                        <div class="border rounded overflow-hidden trip-card">
+                          <div class="position-relative trip-image">
+                            <img [src]="grupo.imagenDestacada || 'images/default-trip.jpg'" 
+                                 [alt]="grupo.nombreViaje"
+                                 class="img-fluid w-100" style="height: 200px; object-fit: cover;">
+                            <span class="position-absolute top-0 start-0 m-2 badge bg-primary rounded-pill">
+                              {{ grupo.destinoPrincipal || 'Destino' }}
+                            </span>
+                            <span class="position-absolute top-0 end-0 m-2 badge bg-success rounded-pill">Activo</span>
+                          </div>
+                          <div class="p-3">
+                            <h6 class="mb-0">{{ grupo.nombreViaje }}</h6>
+                            <div class="d-flex align-items-center gap-1 small text-muted mt-1" *ngIf="grupo.fechaInicio">
+                              <i class="bi bi-calendar"></i>
+                              <span>{{ grupo.fechaInicio | date: 'dd MMM yyyy' }}</span>
+                              <span *ngIf="grupo.fechaFin"> - {{ grupo.fechaFin | date: 'dd MMM yyyy' }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-body text-center py-5" *ngIf="!perfil.proximosViajes || perfil.proximosViajes.length === 0">
+                  <div class="text-muted">
+                    <i class="bi bi-calendar-plus display-1 mb-3"></i>
+                    <h5 *ngIf="perfil.esPerfilPropio">¡No tienes próximos viajes!</h5>
+                    <h5 *ngIf="!perfil.esPerfilPropio">Este usuario no tiene próximos viajes</h5>
+                    <p *ngIf="perfil.esPerfilPropio">
+                      <a routerLink="/grupos" class="btn btn-primary">Explorar grupos</a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Historial de viajes -->
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title mb-0">Historial de viajes</h5>
+                  <p class="card-text small text-muted" *ngIf="perfil.totalHistorialViajes > 0">
+                    {{ perfil.totalHistorialViajes }} viaje<span *ngIf="perfil.totalHistorialViajes !== 1">s</span> completado<span *ngIf="perfil.totalHistorialViajes !== 1">s</span>
+                  </p>
+                </div>
+                <div class="card-body" *ngIf="perfil.historialViajes && perfil.historialViajes.length > 0">
+                  <div class="row g-3">
+                    <!-- Historial dinámico -->
+                    <div class="col-md-4" *ngFor="let grupo of perfil.historialViajes">
+                      <a [routerLink]="['/grupos', grupo.idGrupo]" class="text-decoration-none">
+                        <div class="border rounded overflow-hidden trip-card">
+                          <div class="position-relative trip-image">
+                            <img [src]="grupo.imagenDestacada || 'images/default-trip.jpg'" 
+                                 [alt]="grupo.nombreViaje"
+                                 class="img-fluid w-100" style="height: 200px; object-fit: cover;">
+                            <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-40">
+                              <span class="badge bg-dark">{{ grupo.estado === 'cerrado' ? 'Cerrado' : 'Concluido' }}</span>
+                            </div>
+                            <span class="position-absolute top-0 start-0 m-2 badge bg-primary rounded-pill">
+                              {{ grupo.destinoPrincipal || 'Destino' }}
+                            </span>
+                          </div>
+                          <div class="p-3">
+                            <h6 class="mb-0">{{ grupo.nombreViaje }}</h6>
+                            <div class="d-flex align-items-center gap-1 small text-muted mt-1" *ngIf="grupo.fechaInicio">
+                              <i class="bi bi-calendar"></i>
+                              <span>{{ grupo.fechaInicio | date: 'dd MMM yyyy' }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-body text-center py-5" *ngIf="!perfil.historialViajes || perfil.historialViajes.length === 0">
+                  <div class="text-muted">
+                    <i class="bi bi-clock-history display-1 mb-3"></i>
+                    <h5 *ngIf="perfil.esPerfilPropio">¡Aún no has completado ningún viaje!</h5>
+                    <h5 *ngIf="!perfil.esPerfilPropio">Este usuario no ha completado ningún viaje</h5>
+                    <p *ngIf="perfil.esPerfilPropio">Participa en viajes para crear tu historial de aventuras.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
