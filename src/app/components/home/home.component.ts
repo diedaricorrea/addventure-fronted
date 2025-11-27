@@ -10,18 +10,24 @@ import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-home',
-  standalone: true,
+  standalone: true, // Componente standalone (sin módulo)
   imports: [CommonModule, RouterModule, NavbarComponent, FooterComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit, OnDestroy {
+
+  // Aquí se almacenarán los datos que vienen del backend
   homeData: HomeData | null = null;
+
+  // Estados para mostrar carga y errores en la interfaz
   loading = true;
   error: string | null = null;
+
+  // Para escuchar cambios en la autenticación
   private authSubscription?: Subscription;
 
-  // Destinations data
+  // Datos de destinos (esto es estático para mostrar en la UI)
   destinations = [
     {
       id: 1,
@@ -79,25 +85,27 @@ export class HomeComponent implements OnInit, OnDestroy {
     },
   ];
 
+  // Variables del carrusel
   currentSlide = 0;
   slidesPerView = 4;
   private carouselInterval: any;
 
   constructor(
-    private homeService: HomeService,
-    private authService: AuthService
+    private homeService: HomeService, // Servicio que llama al backend
+    private authService: AuthService  // Servicio para detectar autenticación
   ) { }
 
   ngOnInit(): void {
+    // Cargar datos del home al entrar
     this.loadHomeData();
 
-    // Suscribirse a cambios de autenticación
+    // Nos suscribimos a cambios del usuario autenticado
     this.authSubscription = this.authService.currentUser$.subscribe(user => {
-      // Recargar datos cuando cambia el estado de autenticación
+      // Si cambia el estado de autenticación, recargo datos
       this.loadHomeData();
     });
 
-    // Inicializar carrusel después de que la vista se cargue
+    // Inicializa funciones visuales después de cargarse la vista
     setTimeout(() => {
       this.initCarousel();
       this.initFadeAnimations();
@@ -105,16 +113,20 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Evitar fugas de memoria: cerrar suscripciones
     this.authSubscription?.unsubscribe();
+
+    // Detener intervalo del carrusel
     if (this.carouselInterval) {
       clearInterval(this.carouselInterval);
     }
   }
 
+  // Método que llama al servicio y obtiene los datos del backend
   loadHomeData(): void {
     this.homeService.getHomeData().subscribe({
       next: (data) => {
-        this.homeData = data;
+        this.homeData = data; // Guardamos los datos recibidos
         this.loading = false;
       },
       error: (err) => {
@@ -125,13 +137,14 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Configuración del carrusel: cambia automáticamente cada 5s
   initCarousel(): void {
-    // Auto slide every 5 seconds
     this.carouselInterval = setInterval(() => {
       this.nextSlide();
     }, 5000);
   }
 
+  // Añade animaciones de fade al hacer scroll
   initFadeAnimations(): void {
     const fadeElements = document.querySelectorAll('.fade-in');
 
@@ -154,22 +167,27 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Número total de slides calculado según items y vista
   get totalSlides(): number {
     return Math.ceil(this.destinations.length / this.slidesPerView);
   }
 
+  // Navegar al slide anterior
   prevSlide(): void {
     this.currentSlide = this.currentSlide === 0 ? this.totalSlides - 1 : this.currentSlide - 1;
   }
 
+  // Navegar al siguiente slide
   nextSlide(): void {
     this.currentSlide = this.currentSlide === this.totalSlides - 1 ? 0 : this.currentSlide + 1;
   }
 
+  // Ir directamente a un slide
   goToSlide(index: number): void {
     this.currentSlide = index;
   }
 
+  // Mover el carrusel con transformaciones de CSS
   getCarouselTransform(): string {
     const slideWidth = 100 / this.slidesPerView;
     return `translateX(-${this.currentSlide * slideWidth * this.slidesPerView}%)`;

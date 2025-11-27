@@ -2,27 +2,44 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ProfileService } from '../../services/profile.service';
+import { HomeService } from '../../services/home.service';
 import { PerfilResponse } from '../../models/perfil.model';
+import { HomeData } from '../../models/home-data.model';
+import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+import { FooterComponent } from '../../shared/components/footer/footer.component';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, NavbarComponent, FooterComponent],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })
 export class ProfileComponent implements OnInit {
   perfil: PerfilResponse | null = null;
+  homeData: HomeData | null = null;
   loading = true;
   error: string | null = null;
   activeTab: 'perfil' | 'viajes' = 'perfil';
 
   constructor(
     private profileService: ProfileService,
+    private homeService: HomeService,
     private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
+    // Cargar datos de la navbar
+    this.homeService.getHomeData().subscribe({
+      next: (data) => {
+        this.homeData = data;
+      },
+      error: (err) => {
+        console.error('Error al cargar datos de navbar:', err);
+      }
+    });
+
+    // Cargar datos del perfil
     this.route.params.subscribe(params => {
       const userId = params['id'];
       if (userId) {

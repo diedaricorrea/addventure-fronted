@@ -1,3 +1,6 @@
+<!-- Navbar Component -->
+<app-navbar [homeData]="homeData"></app-navbar>
+
 <div *ngIf="loading" class="container mt-5 text-center">
   <div class="spinner-border text-primary" role="status">
     <span class="visually-hidden">Cargando...</span>
@@ -41,7 +44,7 @@
               <div class="d-flex align-items-center gap-2">
                 <h1 class="fs-2 fw-bold mb-0">{{ perfil.nombre }} {{ perfil.apellidos }}</h1>
                 <!-- Mostrar etiqueta verificado -->
-                <span *ngIf="perfil.verificado" 
+                <span *ngIf="perfil.verificado"
                       class="badge bg-success d-flex align-items-center gap-1"
                       title="Usuario verificado por la comunidad (5+ reseñas positivas)">
                   <i class="bi bi-shield-check-fill"></i> Verificado
@@ -113,7 +116,7 @@
       <!-- Tabs -->
       <ul class="nav nav-pills mt-5" id="profileTabs" role="tablist">
         <li class="nav-item" role="presentation">
-          <button class="nav-link d-flex align-items-center" 
+          <button class="nav-link d-flex align-items-center"
                   [class.active]="activeTab === 'perfil'"
                   (click)="switchTab('perfil')"
                   type="button">
@@ -121,7 +124,7 @@
           </button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link d-flex align-items-center" 
+          <button class="nav-link d-flex align-items-center"
                   [class.active]="activeTab === 'viajes'"
                   (click)="switchTab('viajes')"
                   type="button">
@@ -146,7 +149,7 @@
                   <p class="text-muted" *ngIf="perfil.biografia && perfil.biografia.trim()">
                     {{ perfil.biografia }}
                   </p>
-                  
+
                   <!-- Mensaje cuando no hay biografía -->
                   <p class="text-muted fst-italic" *ngIf="!perfil.biografia || !perfil.biografia.trim()">
                     <span *ngIf="perfil.esPerfilPropio">Aún no has agregado una descripción a tu perfil.</span>
@@ -194,7 +197,7 @@
                   <h5 class="card-title mb-0">Reseñas de otros viajeros</h5>
                   <p class="card-text small text-muted" *ngIf="perfil.totalResenas > 0">
                     <i class="bi bi-star-fill text-warning me-1"></i>
-                    {{ perfil.promedioCalificaciones }} de 5 estrellas · 
+                    {{ perfil.promedioCalificaciones }} de 5 estrellas ·
                     {{ perfil.totalResenas }} reseña<span *ngIf="perfil.totalResenas !== 1">s</span>
                   </p>
                   <p class="card-text small text-muted" *ngIf="perfil.totalResenas === 0">
@@ -213,13 +216,13 @@
                             <div>
                               <h6 class="mb-0">{{ resena.autor.nombre }} {{ resena.autor.apellidos }}</h6>
                               <p class="small text-muted mb-0">
-                                Viaje: {{ resena.grupo.nombreViaje }} · 
+                                Viaje: {{ resena.grupo.nombreViaje }} ·
                                 {{ formatFecha(resena.fecha) }}
                               </p>
                             </div>
                             <div class="stars-container mt-2 mt-sm-0">
                               <!-- Estrellas dinámicas -->
-                              <i *ngFor="let filled of getStars(resena.calificacion)" 
+                              <i *ngFor="let filled of getStars(resena.calificacion)"
                                  [class]="filled ? 'bi bi-star-fill text-warning' : 'bi bi-star text-warning'"></i>
                             </div>
                           </div>
@@ -335,7 +338,7 @@
                       <a [routerLink]="['/grupos', grupo.idGrupo]" class="text-decoration-none">
                         <div class="border rounded overflow-hidden trip-card">
                           <div class="position-relative trip-image">
-                            <img [src]="grupo.imagenDestacada || 'images/default-trip.jpg'" 
+                            <img [src]="grupo.imagenDestacada || 'images/default-trip.jpg'"
                                  [alt]="grupo.nombreViaje"
                                  class="img-fluid w-100" style="height: 200px; object-fit: cover;">
                             <span class="position-absolute top-0 start-0 m-2 badge bg-primary rounded-pill">
@@ -385,7 +388,7 @@
                       <a [routerLink]="['/grupos', grupo.idGrupo]" class="text-decoration-none">
                         <div class="border rounded overflow-hidden trip-card">
                           <div class="position-relative trip-image">
-                            <img [src]="grupo.imagenDestacada || 'images/default-trip.jpg'" 
+                            <img [src]="grupo.imagenDestacada || 'images/default-trip.jpg'"
                                  [alt]="grupo.nombreViaje"
                                  class="img-fluid w-100" style="height: 200px; object-fit: cover;">
                             <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-40">
@@ -423,3 +426,6 @@
     </div>
   </div>
 </div>
+
+<!-- Footer Component -->
+<app-footer></app-footer>
