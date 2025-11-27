@@ -59,7 +59,7 @@
                                id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                 <div class="avatar-circle bg-light text-primary fw-bold me-2">
                                     @if (homeData.imagenPerfil) {
-                                        <img [src]="'http://localhost:8080' + homeData.imagenPerfil"
+                                        <img [src]="'http://localhost:8080/uploads/' + homeData.imagenPerfil"
                                              alt="Perfil actual">
                                     } @else {
                                         <span class="fs-3 fw-medium">{{ homeData.iniciales }}</span>
@@ -80,7 +80,7 @@
                                 </li>
                                 <li>
                                     <a class="dropdown-item d-flex align-items-center gap-2"
-                                       href="http://localhost:8080/perfil/configuracion">
+                                       routerLink="/configuracion">
                                         <i class="bi bi-gear"></i> Configuración
                                     </a>
                                 </li>

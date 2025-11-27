@@ -25,4 +25,29 @@ export class ProfileService {
   getPerfilUsuario(id: number): Observable<PerfilResponse> {
     return this.http.get<PerfilResponse>(`${this.apiUrl}/${id}`);
   }
+
+  /**
+   * Actualizar perfil del usuario autenticado
+   */
+  actualizarPerfil(data: any): Observable<PerfilResponse> {
+    return this.http.put<PerfilResponse>(this.apiUrl, data);
+  }
+
+  /**
+   * Subir imagen de perfil
+   */
+  subirImagenPerfil(imagen: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('imagen', imagen);
+    return this.http.post(`${this.apiUrl}/imagen-perfil`, formData);
+  }
+
+  /**
+   * Subir imagen de portada
+   */
+  subirImagenPortada(imagen: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('imagen', imagen);
+    return this.http.post(`${this.apiUrl}/imagen-portada`, formData);
+  }
 }

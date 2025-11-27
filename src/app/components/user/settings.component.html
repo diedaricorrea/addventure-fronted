@@ -1,0 +1,257 @@
+<!-- Navbar -->
+<app-navbar [homeData]="homeData"></app-navbar>
+
+@if (loading) {
+  <div class="container mt-5 text-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+}
+
+@if (!loading) {
+  <main class="container py-4 py-md-5">
+  <div class="mx-auto" style="max-width: 1000px;">
+    <div class="d-flex align-items-center gap-2 mb-4">
+      <i class="bi bi-gear fs-4 text-primary"></i>
+      <h1 class="fs-2 fw-bold mb-0">Configuración</h1>
+    </div>
+
+    <div class="row g-4">
+      <!-- Sidebar -->
+      <div class="col-md-3">
+        <ul class="nav flex-column nav-pills">
+          <li class="nav-item mb-1">
+            <button
+              class="nav-link d-flex align-items-center w-100"
+              [class.active]="activeTab === 'cuenta'"
+              (click)="switchTab('cuenta')">
+              <i class="bi bi-person me-2"></i>
+              Cuenta y perfil
+            </button>
+          </li>
+          <li class="nav-item mb-1">
+            <button
+              class="nav-link d-flex align-items-center w-100"
+              [class.active]="activeTab === 'seguridad'"
+              (click)="switchTab('seguridad')">
+              <i class="bi bi-lock me-2"></i>
+              Seguridad y verificación
+            </button>
+          </li>
+        </ul>
+
+        <!-- Estado de verificación -->
+        @if (perfil) {
+          <div class="card mt-4 shadow-sm">
+            <div class="card-body">
+              <h5 class="fw-medium mb-2">Estado de tu cuenta</h5>
+              <div>
+                @if (isVerified) {
+                  <span class="badge bg-success d-flex align-items-center gap-1">
+                    <i class="bi bi-shield-check-fill"></i> Cuenta verificada
+                  </span>
+                } @else {
+                  <span class="badge bg-warning d-flex align-items-center gap-1">
+                    <i class="bi bi-shield"></i> Cuenta no verificada
+                  </span>
+                }
+                <div class="mt-2">
+                  <i class="bi bi-star"></i>
+                  <span>{{ perfil.totalResenas }} reseñas positivas</span>
+                </div>
+                @if (!isVerified && reseniasFaltantes > 0) {
+                  <small class="text-muted d-block mt-1">
+                    Te faltan {{ reseniasFaltantes }} reseñas para la verificación
+                  </small>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Main content -->
+      <div class="col-md-9">
+        <!-- Mensajes -->
+        @if (successMessage) {
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            {{ successMessage }}
+            <button type="button" class="btn-close" (click)="successMessage = null"></button>
+          </div>
+        }
+
+        @if (error) {
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>
+            {{ error }}
+            <button type="button" class="btn-close" (click)="error = null"></button>
+          </div>
+        }
+
+        <!-- Tab: Cuenta y perfil -->
+        @if (activeTab === 'cuenta' && perfil) {
+          <div class="card shadow-sm">
+          <div class="card-header">
+            <h5 class="card-title mb-0">Información de perfil</h5>
+            <p class="card-text text-muted small mb-0">Actualiza tu información personal y preferencias</p>
+          </div>
+          <div class="card-body">
+            <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+
+              <!-- Imagen de portada -->
+              <div class="mb-4">
+                <label class="form-label mb-2">Imagen de portada</label>
+                <div class="position-relative rounded overflow-hidden mb-2" style="height: 160px; background-color: #f8f9fa;">
+                  <div class="w-100 h-100 d-flex align-items-center justify-content-center"
+                       [style.background-image]="coverPreview ? 'url(' + coverPreview + ')' : (perfil.imagenPortada ? 'url(' + getImageUrl(perfil.imagenPortada) + ')' : 'none')"
+                       [style.background-size]="'cover'"
+                       [style.background-position]="'center'">
+                    @if (!coverPreview && !perfil.imagenPortada) {
+                      <i class="bi bi-upload fs-3 text-secondary"></i>
+                    }
+                  </div>
+                </div>
+                <div class="d-flex justify-content-center">
+                  <label class="btn btn-outline-primary d-flex align-items-center gap-2">
+                    <i class="bi bi-upload"></i>
+                    <span>Cambiar imagen de portada</span>
+                    <input type="file" class="d-none" accept="image/*" (change)="onCoverChange($event)">
+                  </label>
+                </div>
+              </div>
+
+              <!-- Imagen de perfil -->
+              <div class="d-flex justify-content-center mt-4 mb-4">
+                <div class="position-relative" style="width: 96px; height: 96px;">
+                  <div class="avatar bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center border border-4 border-white shadow"
+                       style="width: 96px; height: 96px; position: relative; overflow: hidden;">
+                    @if (profilePreview || perfil.imagenPerfil) {
+                      <img [src]="profilePreview || getImageUrl(perfil.imagenPerfil)"
+                           style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
+                    } @else {
+                      <span class="fs-3 fw-medium">{{ perfil.iniciales }}</span>
+                    }
+                  </div>
+                  <label class="position-absolute bottom-0 end-0 rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                         style="width: 32px; height: 32px; cursor: pointer;">
+                    <i class="bi bi-camera"></i>
+                    <input type="file" class="d-none" accept="image/*" (change)="onProfileChange($event)">
+                  </label>
+                </div>
+              </div>
+
+              <hr>
+
+              <!-- Campos del formulario -->
+              <div class="row mb-3">
+                <div class="col-md-6 mb-3 mb-md-0">
+                  <label class="form-label"><i class="bi bi-person me-2"></i>Nombres</label>
+                  <input type="text" class="form-control" formControlName="nombre"
+                         [class.is-invalid]="profileForm.get('nombre')?.invalid && profileForm.get('nombre')?.touched">
+                  @if (profileForm.get('nombre')?.errors?.['required']) {
+                    <div class="invalid-feedback">
+                      El nombre es obligatorio
+                    </div>
+                  }
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Apellidos</label>
+                  <input type="text" class="form-control" formControlName="apellidos"
+                         [class.is-invalid]="profileForm.get('apellidos')?.invalid && profileForm.get('apellidos')?.touched">
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-12">
+                  <label class="form-label"><i class="bi bi-at me-2"></i>Nombre de usuario</label>
+                  <input type="text" class="form-control" formControlName="username"
+                         [class.is-invalid]="profileForm.get('username')?.invalid && profileForm.get('username')?.touched">
+                  @if (profileForm.get('username')?.errors?.['pattern']) {
+                    <div class="invalid-feedback">
+                      Solo letras, números y guiones bajos
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-6 mb-3 mb-md-0">
+                  <label class="form-label"><i class="bi bi-envelope me-2"></i>Correo electrónico</label>
+                  <input type="email" class="form-control" [value]="perfil.email" readonly>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label"><i class="bi bi-telephone me-2"></i>Teléfono</label>
+                  <input type="tel" class="form-control" formControlName="telefono"
+                         [class.is-invalid]="profileForm.get('telefono')?.invalid && profileForm.get('telefono')?.touched">
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-6 mb-3 mb-md-0">
+                  <label class="form-label"><i class="bi bi-globe me-2"></i>País</label>
+                  <select class="form-select" formControlName="pais">
+                    <option value="España">España</option>
+                    <option value="Perú">Perú</option>
+                    <option value="México">México</option>
+                    <option value="Argentina">Argentina</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label"><i class="bi bi-geo-alt me-2"></i>Ciudad</label>
+                  <input type="text" class="form-control" formControlName="ciudad">
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label"><i class="bi bi-calendar me-2"></i>Fecha de nacimiento</label>
+                <input type="date" class="form-control" formControlName="fechaNacimiento">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Biografía</label>
+                <textarea class="form-control" rows="4" formControlName="biografia"
+                          placeholder="Cuéntanos sobre ti..." maxlength="500"></textarea>
+                <small class="text-muted">{{ profileForm.get('biografia')?.value?.length || 0 }} / 500 caracteres</small>
+              </div>
+
+              <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary d-flex align-items-center gap-2"
+                        [disabled]="saving || profileForm.invalid">
+                  @if (saving) {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                  } @else {
+                    <i class="bi bi-save"></i>
+                  }
+                  {{ saving ? 'Guardando...' : 'Guardar cambios' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        }
+
+        <!-- Tab: Seguridad -->
+        @if (activeTab === 'seguridad') {
+          <div class="card shadow-sm">
+            <div class="card-header">
+              <h5 class="card-title mb-0">Seguridad y verificación</h5>
+              <p class="card-text text-muted small mb-0">Gestiona la seguridad de tu cuenta</p>
+            </div>
+            <div class="card-body">
+              <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                Funcionalidades de seguridad disponibles próximamente
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</main>
+}
+
+<!-- Footer -->
+<app-footer></app-footer>
