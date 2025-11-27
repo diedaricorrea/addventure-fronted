@@ -1,0 +1,245 @@
+<!-- Navbar -->
+<app-navbar [homeData]="homeData"></app-navbar>
+
+<!-- Main Content -->
+<main class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <!-- Header -->
+      <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold mb-2">Centro de Ayuda</h1>
+        <p class="text-muted">¿Tienes alguna pregunta o necesitas asistencia? Estamos aquí para ayudarte.</p>
+      </div>
+
+      <!-- Help Options Cards -->
+      <div class="row mb-5">
+        <div class="col-md-4 mb-4 mb-md-0">
+          <div class="card h-100 text-center">
+            <div class="card-body">
+              <div class="icon-circle bg-primary-light mx-auto mb-3">
+                <i class="bi bi-chat-square-text text-primary"></i>
+              </div>
+              <h5 class="card-title">Contacto</h5>
+              <p class="card-text text-muted">Envíanos un mensaje y te responderemos lo antes posible.</p>
+              <button class="btn btn-outline-primary" (click)="scrollToContact()">
+                <i class="bi bi-send me-2"></i>Contactar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4 mb-4 mb-md-0">
+          <div class="card h-100 text-center">
+            <div class="card-body">
+              <div class="icon-circle bg-success-light mx-auto mb-3">
+                <i class="bi bi-file-earmark-text text-success"></i>
+              </div>
+              <h5 class="card-title">Preguntas frecuentes</h5>
+              <p class="card-text text-muted">Encuentra respuestas a las preguntas más comunes.</p>
+              <button class="btn btn-outline-success" (click)="scrollToFAQ()">
+                <i class="bi bi-question-circle me-2"></i>Ver FAQ
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card h-100 text-center">
+            <div class="card-body">
+              <div class="icon-circle bg-purple-light mx-auto mb-3">
+                <i class="bi bi-file-earmark-play text-purple"></i>
+              </div>
+              <h5 class="card-title">Guías y tutoriales</h5>
+              <p class="card-text text-muted">Aprende a sacar el máximo provecho de AddVenture.</p>
+              <button class="btn btn-outline-purple">
+                <i class="bi bi-arrow-right me-2"></i>Ver guías
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ Section -->
+      <div id="faqSection" class="mb-5">
+        <h2 class="fw-bold mb-4">Preguntas frecuentes</h2>
+        <div class="accordion" id="faqAccordion">
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                <i class="bi bi-question-circle text-primary me-2"></i>
+                ¿Cómo puedo unirme a un grupo de viaje?
+              </button>
+            </h2>
+            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+              <div class="accordion-body text-muted">
+                Para unirte a un grupo de viaje, navega a la sección 'Buscar Grupos', encuentra un grupo que te
+                interese y haz clic en el botón 'Unirse al grupo'. El organizador recibirá tu solicitud y podrá
+                aceptarla.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                <i class="bi bi-question-circle text-primary me-2"></i>
+                ¿Cómo funciona el sistema de verificación?
+              </button>
+            </h2>
+            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body text-muted">
+                Los usuarios obtienen la insignia de verificado cuando reciben 5 o más reseñas positivas (4-5
+                estrellas) de otros viajeros. Esto ayuda a construir confianza en la comunidad.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                <i class="bi bi-question-circle text-primary me-2"></i>
+                ¿Puedo cancelar mi participación en un grupo?
+              </button>
+            </h2>
+            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body text-muted">
+                Sí, puedes cancelar tu participación en cualquier momento antes del viaje. Sin embargo, te
+                recomendamos hacerlo con suficiente antelación para no afectar los planes del grupo.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                <i class="bi bi-question-circle text-primary me-2"></i>
+                ¿Cómo puedo contactar con el soporte?
+              </button>
+            </h2>
+            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body text-muted">
+                Puedes contactar con nuestro equipo de soporte a través del formulario en esta página o enviando un
+                email a soporte@addventure.com.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Form Section -->
+      <div id="contactForm">
+        <h2 class="fw-bold mb-4">Contáctanos</h2>
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title mb-0">Formulario de contacto</h5>
+            <p class="card-text text-muted small">Completa el formulario y te responderemos a la brevedad.</p>
+          </div>
+          <div class="card-body">
+            <!-- Formulario -->
+            @if (showForm) {
+              <form [formGroup]="contactForm" (ngSubmit)="onSubmit()">
+                @if (error) {
+                  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    {{ error }}
+                    <button type="button" class="btn-close" (click)="error = null"></button>
+                  </div>
+                }
+
+                <div class="row mb-3">
+                  <div class="col-md-6 mb-3 mb-md-0">
+                    <label for="nombre" class="form-label">Nombre completo</label>
+                    <input type="text" class="form-control" id="nombre" formControlName="nombre"
+                      [class.is-invalid]="contactForm.get('nombre')?.invalid && contactForm.get('nombre')?.touched">
+                    @if (contactForm.get('nombre')?.errors?.['required'] && contactForm.get('nombre')?.touched) {
+                      <div class="invalid-feedback">Por favor ingresa tu nombre.</div>
+                    }
+                  </div>
+                  <div class="col-md-6">
+                    <label for="email" class="form-label">Correo electrónico</label>
+                    <input type="email" class="form-control" id="email" formControlName="email"
+                      [class.is-invalid]="contactForm.get('email')?.invalid && contactForm.get('email')?.touched">
+                    @if (contactForm.get('email')?.errors?.['required'] && contactForm.get('email')?.touched) {
+                      <div class="invalid-feedback">Por favor ingresa un correo electrónico.</div>
+                    }
+                    @if (contactForm.get('email')?.errors?.['email'] && contactForm.get('email')?.touched) {
+                      <div class="invalid-feedback">Por favor ingresa un correo electrónico válido.</div>
+                    }
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col-md-6 mb-3 mb-md-0">
+                    <label for="asunto" class="form-label">Asunto</label>
+                    <input type="text" class="form-control" id="asunto" formControlName="asunto"
+                      [class.is-invalid]="contactForm.get('asunto')?.invalid && contactForm.get('asunto')?.touched">
+                    @if (contactForm.get('asunto')?.errors?.['required'] && contactForm.get('asunto')?.touched) {
+                      <div class="invalid-feedback">Por favor ingresa el asunto.</div>
+                    }
+                  </div>
+                  <div class="col-md-6">
+                    <label for="categoria" class="form-label">Categoría</label>
+                    <select class="form-select" id="categoria" formControlName="categoria"
+                      [class.is-invalid]="contactForm.get('categoria')?.invalid && contactForm.get('categoria')?.touched">
+                      <option value="" selected disabled>Selecciona una categoría</option>
+                      <option value="cuenta">Cuenta y perfil</option>
+                      <option value="grupos">Grupos de viaje</option>
+                      <option value="pagos">Pagos y facturación</option>
+                      <option value="tecnico">Problemas técnicos</option>
+                      <option value="sugerencias">Sugerencias</option>
+                      <option value="otros">Otros</option>
+                    </select>
+                    @if (contactForm.get('categoria')?.errors?.['required'] && contactForm.get('categoria')?.touched) {
+                      <div class="invalid-feedback">Por favor selecciona una categoría.</div>
+                    }
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="mensaje" class="form-label">Mensaje</label>
+                  <textarea class="form-control" id="mensaje" formControlName="mensaje" rows="5"
+                    placeholder="Describe tu consulta o problema en detalle..."
+                    [class.is-invalid]="contactForm.get('mensaje')?.invalid && contactForm.get('mensaje')?.touched"></textarea>
+                  @if (contactForm.get('mensaje')?.errors?.['required'] && contactForm.get('mensaje')?.touched) {
+                    <div class="invalid-feedback">Por favor ingresa tu mensaje.</div>
+                  }
+                  @if (contactForm.get('mensaje')?.errors?.['minlength'] && contactForm.get('mensaje')?.touched) {
+                    <div class="invalid-feedback">El mensaje debe tener al menos 10 caracteres.</div>
+                  }
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100" [disabled]="loading">
+                  @if (loading) {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                  } @else {
+                    <i class="bi bi-send me-2"></i>
+                  }
+                  {{ loading ? 'Enviando...' : 'Enviar mensaje' }}
+                </button>
+              </form>
+            }
+
+            <!-- Success Message -->
+            @if (!showForm && submitted) {
+              <div class="text-center py-5">
+                <div class="icon-circle bg-success-light mx-auto mb-4" style="width: 80px; height: 80px;">
+                  <i class="bi bi-check-circle text-success" style="font-size: 2rem;"></i>
+                </div>
+                <h3 class="fw-bold mb-2">¡Mensaje enviado!</h3>
+                <p class="text-muted mb-4">
+                  {{ successMessage || 'Gracias por contactarnos. Hemos recibido tu mensaje y te responderemos a la brevedad.' }}
+                </p>
+                <button class="btn btn-primary" (click)="sendAnotherMessage()">
+                  Enviar otro mensaje
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<app-footer></app-footer>
