@@ -16,13 +16,13 @@ import { Subscription } from 'rxjs';
 export class NavbarComponent implements OnInit, OnDestroy {
   @Input() homeData: HomeData | null = null;
   private homeDataSubscription?: Subscription;
-  
+
   constructor(
     private authService: AuthService,
     private router: Router,
     private homeService: HomeService
   ) {}
-  
+
   ngOnInit(): void {
     // Suscribirse a los cambios de homeData
     this.homeDataSubscription = this.homeService.homeData$.subscribe(data => {
@@ -31,15 +31,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
       }
     });
   }
-  
+
   ngOnDestroy(): void {
     this.homeDataSubscription?.unsubscribe();
   }
-  
+
   get isAuthenticated(): boolean {
     return this.homeData?.authenticated || false;
   }
-  
+
   logout(): void {
     this.authService.logout();
     // Forzar recarga de la página para limpiar estado

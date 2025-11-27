@@ -196,10 +196,10 @@ export class SettingsComponent implements OnInit {
         this.profileFile = null;
         this.coverPreview = null;
         this.profilePreview = null;
-        
+
         // Recargar datos del perfil
         this.loadData();
-        
+
         // Forzar actualización de la navbar
         this.homeService.refreshHomeData();
       }

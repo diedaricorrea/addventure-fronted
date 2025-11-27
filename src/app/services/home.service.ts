@@ -9,7 +9,7 @@ import { environment } from '../../environments/environment';
 })
 export class HomeService {
   private apiUrl = `${environment.apiUrl}/home`;
-  
+
   // Subject para compartir datos entre componentes
   private homeDataSubject = new BehaviorSubject<HomeData | null>(null);
   public homeData$ = this.homeDataSubject.asObservable();
@@ -25,7 +25,7 @@ export class HomeService {
       tap(data => this.homeDataSubject.next(data)) // Actualizar el subject cuando se reciben datos
     );
   }
-  
+
   // Método para forzar la recarga de datos
   refreshHomeData(): void {
     this.getHomeData().subscribe();
