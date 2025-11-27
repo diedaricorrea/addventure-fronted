@@ -1,0 +1,410 @@
+<!-- Navbar Component -->
+<app-navbar></app-navbar>
+
+<div class="container py-5">
+  <!-- Header -->
+  <div class="mb-4">
+    <h1 class="fw-bold mb-2">Mis Viajes</h1>
+    <p class="text-muted">Grupos de viaje a los que te has unido o has creado</p>
+    @if (totalGrupos > 0) {
+      <p class="text-muted small">
+        Total: <span>{{ totalGrupos }}</span> {{ totalGrupos === 1 ? 'viaje' : 'viajes' }}
+      </p>
+    }
+  </div>
+
+  <!-- Loading Spinner -->
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+  }
+
+  <!-- Content -->
+  @if (!loading) {
+    <!-- Sección: Viajes Unidos -->
+    @if (gruposUnidos.length > 0) {
+      <div class="mb-5">
+        <div class="d-flex align-items-center mb-3">
+          <h3 class="fw-bold text-primary mb-0">
+            <i class="bi bi-people me-2"></i>Viajes Unidos
+          </h3>
+          <span class="badge bg-primary ms-2">{{ gruposUnidos.length }}</span>
+        </div>
+        <p class="text-muted mb-3">Grupos de viaje a los que te has unido como participante</p>
+
+        <div class="row g-4">
+          @for (grupo of gruposUnidos; track grupo.idGrupo) {
+            <div class="col-12 col-md-6 col-lg-4">
+              <div class="card h-100 border-light hover-shadow">
+                <!-- Imagen -->
+                <div class="position-relative">
+                  <img [src]="getImagenUrl(grupo)"
+                       class="card-img-top object-cover"
+                       alt="Imagen del viaje"
+                       style="height: 200px;">
+
+                  <!-- Badge destino -->
+                  @if (grupo.viaje?.destinoPrincipal) {
+                    <span class="badge bg-primary position-absolute top-0 start-0 m-2">
+                      <i class="bi bi-geo-alt me-1"></i>{{ grupo.viaje!.destinoPrincipal }}
+                    </span>
+                  }
+
+                  <!-- Badge verificado -->
+                  @if (grupo.viaje?.esVerificado) {
+                    <span class="badge bg-success position-absolute top-0 end-0 m-2">
+                      <i class="bi bi-check-circle me-1"></i>Verificado
+                    </span>
+                  }
+
+                  <!-- Badge rol -->
+                  <span class="badge bg-info position-absolute bottom-0 end-0 m-2">
+                    <i class="bi bi-person-check me-1"></i>Participante
+                  </span>
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title fw-bold mb-2">{{ grupo.nombreViaje }}</h5>
+
+                  <!-- Fechas -->
+                  @if (grupo.viaje) {
+                    <div class="d-flex align-items-center text-muted mb-2">
+                      <i class="bi bi-calendar me-2 text-primary"></i>
+                      <small>
+                        <span class="fw-medium">Inicio:</span> {{ formatearFecha(grupo.viaje.fechaInicio) }} •
+                        <span class="fw-medium">Fin:</span> {{ formatearFecha(grupo.viaje.fechaFin) }}
+                      </small>
+                    </div>
+                  }
+
+                  <!-- Participantes y edad -->
+                  <div class="d-flex align-items-center text-muted mb-2">
+                    <i class="bi bi-people me-2 text-primary"></i>
+                    <small>
+                      <span class="fw-medium">Participantes:</span>
+                      {{ (grupo.participantes?.length || 0) + 1 }} de {{ grupo.maxParticipantes }} •
+                      <span class="fw-medium">Edad:</span>
+                      {{ grupo.viaje?.rangoEdadMin || 18 }}-{{ grupo.viaje?.rangoEdadMax || 60 }}
+                    </small>
+                  </div>
+
+                  <!-- Descripción -->
+                  @if (grupo.viaje?.descripcion) {
+                    <p class="card-text text-muted small mb-3">
+                      {{ abreviarTexto(grupo.viaje!.descripcion) }}
+                    </p>
+                  }
+
+                  <!-- Etiquetas -->
+                  @if (grupo.etiquetas && grupo.etiquetas.length > 0) {
+                    <div class="d-flex flex-wrap gap-1 mb-3">
+                      @for (etiqueta of grupo.etiquetas; track etiqueta.idEtiqueta) {
+                        <span class="badge bg-light text-dark">
+                          {{ etiqueta.nombreEtiqueta }}
+                        </span>
+                      }
+                    </div>
+                  }
+
+                  <!-- Botones de acción -->
+                  <div class="d-flex justify-content-between align-items-center mt-auto">
+                    <!-- Botones para grupo activo -->
+                    @if (esGrupoActivo(grupo.estado)) {
+                      <div class="btn-group">
+                        <button class="btn btn-outline-primary btn-sm" (click)="verDetalle(grupo.idGrupo)">
+                          <i class="bi bi-eye me-1"></i>Ver Detalles
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" (click)="confirmarAbandonar(grupo)">
+                          <i class="bi bi-box-arrow-right me-1"></i>Abandonar
+                        </button>
+                      </div>
+                    }
+
+                    <!-- Botones para grupo cerrado -->
+                    @if (esGrupoCerrado(grupo.estado)) {
+                      <div class="btn-group">
+                        <button class="btn btn-outline-primary btn-sm" (click)="verDetalle(grupo.idGrupo)">
+                          <i class="bi bi-eye me-1"></i>Ver Detalles
+                        </button>
+                        <button class="btn btn-outline-success btn-sm" (click)="irACalificaciones(grupo.idGrupo)">
+                          <i class="bi bi-star me-1"></i>Calificar
+                        </button>
+                      </div>
+                    }
+
+                    <!-- Badge estado -->
+                    <div>
+                      @if (esGrupoActivo(grupo.estado)) {
+                        <span class="badge bg-success">
+                          <i class="bi bi-circle-fill me-1"></i>Activo
+                        </span>
+                      }
+                      @if (esGrupoCerrado(grupo.estado)) {
+                        <span class="badge bg-secondary">
+                          <i class="bi bi-check-circle me-1"></i>Finalizado
+                        </span>
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Sección: Viajes Creados -->
+    @if (gruposCreados.length > 0) {
+      <div class="mb-5">
+        <div class="d-flex align-items-center mb-3">
+          <h3 class="fw-bold text-success mb-0">
+            <i class="bi bi-star me-2"></i>Viajes Creados
+          </h3>
+          <span class="badge bg-success ms-2">{{ gruposCreados.length }}</span>
+        </div>
+        <p class="text-muted mb-3">Grupos de viaje que has organizado</p>
+
+        <div class="row g-4">
+          @for (grupo of gruposCreados; track grupo.idGrupo) {
+            <div class="col-12 col-md-6 col-lg-4">
+              <div class="card h-100 border-light hover-shadow">
+                <!-- Imagen -->
+                <div class="position-relative">
+                  <img [src]="getImagenUrl(grupo)"
+                       class="card-img-top object-cover"
+                       alt="Imagen del viaje"
+                       style="height: 200px;">
+
+                  <!-- Badge destino -->
+                  @if (grupo.viaje?.destinoPrincipal) {
+                    <span class="badge bg-primary position-absolute top-0 start-0 m-2">
+                      <i class="bi bi-geo-alt me-1"></i>{{ grupo.viaje!.destinoPrincipal }}
+                    </span>
+                  }
+
+                  <!-- Badge verificado -->
+                  @if (grupo.viaje?.esVerificado) {
+                    <span class="badge bg-success position-absolute top-0 end-0 m-2">
+                      <i class="bi bi-check-circle me-1"></i>Verificado
+                    </span>
+                  }
+
+                  <!-- Badge rol -->
+                  <span class="badge bg-warning text-dark position-absolute bottom-0 end-0 m-2">
+                    <i class="bi bi-star-fill me-1"></i>Organizador
+                  </span>
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title fw-bold mb-2">{{ grupo.nombreViaje }}</h5>
+
+                  <!-- Fechas -->
+                  @if (grupo.viaje) {
+                    <div class="d-flex align-items-center text-muted mb-2">
+                      <i class="bi bi-calendar me-2 text-primary"></i>
+                      <small>
+                        <span class="fw-medium">Inicio:</span> {{ formatearFecha(grupo.viaje.fechaInicio) }} •
+                        <span class="fw-medium">Fin:</span> {{ formatearFecha(grupo.viaje.fechaFin) }}
+                      </small>
+                    </div>
+                  }
+
+                  <!-- Participantes y edad -->
+                  <div class="d-flex align-items-center text-muted mb-2">
+                    <i class="bi bi-people me-2 text-primary"></i>
+                    <small>
+                      <span class="fw-medium">Participantes:</span>
+                      {{ (grupo.participantes?.length || 0) + 1 }} de {{ grupo.maxParticipantes }} •
+                      <span class="fw-medium">Edad:</span>
+                      {{ grupo.viaje?.rangoEdadMin || 18 }}-{{ grupo.viaje?.rangoEdadMax || 60 }}
+                    </small>
+                  </div>
+
+                  <!-- Descripción -->
+                  @if (grupo.viaje?.descripcion) {
+                    <p class="card-text text-muted small mb-3">
+                      {{ abreviarTexto(grupo.viaje!.descripcion) }}
+                    </p>
+                  }
+
+                  <!-- Etiquetas -->
+                  @if (grupo.etiquetas && grupo.etiquetas.length > 0) {
+                    <div class="d-flex flex-wrap gap-1 mb-3">
+                      @for (etiqueta of grupo.etiquetas; track etiqueta.idEtiqueta) {
+                        <span class="badge bg-light text-dark">
+                          {{ etiqueta.nombreEtiqueta }}
+                        </span>
+                      }
+                    </div>
+                  }
+
+                  <!-- Botones de acción -->
+                  <div class="d-flex justify-content-between align-items-center mt-auto">
+                    <!-- Botones para creador cuando está activo -->
+                    @if (esGrupoActivo(grupo.estado)) {
+                      <div class="btn-group">
+                        <button class="btn btn-outline-primary btn-sm" (click)="verDetalle(grupo.idGrupo)">
+                          <i class="bi bi-eye me-1"></i>Ver
+                        </button>
+                        <button class="btn btn-outline-warning btn-sm" (click)="irAEditar(grupo.idGrupo)">
+                          <i class="bi bi-pencil me-1"></i>Editar
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" (click)="confirmarEliminar(grupo)">
+                          <i class="bi bi-trash me-1"></i>Eliminar
+                        </button>
+                      </div>
+                    }
+
+                    <!-- Botones para creador cuando está cerrado -->
+                    @if (esGrupoCerrado(grupo.estado)) {
+                      <div class="btn-group">
+                        <button class="btn btn-outline-primary btn-sm" (click)="verDetalle(grupo.idGrupo)">
+                          <i class="bi bi-eye me-1"></i>Ver
+                        </button>
+                        <button class="btn btn-outline-success btn-sm" (click)="irACalificaciones(grupo.idGrupo)">
+                          <i class="bi bi-star me-1"></i>Calificar
+                        </button>
+                      </div>
+                    }
+
+                    <!-- Badge estado -->
+                    <div>
+                      @if (esGrupoActivo(grupo.estado)) {
+                        <span class="badge bg-success">
+                          <i class="bi bi-circle-fill me-1"></i>Activo
+                        </span>
+                      }
+                      @if (esGrupoCerrado(grupo.estado)) {
+                        <span class="badge bg-secondary">
+                          <i class="bi bi-check-circle me-1"></i>Finalizado
+                        </span>
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Sección: Viajes Cerrados/Concluidos -->
+    @if (gruposCerrados.length > 0) {
+      <div class="mb-5">
+        <div class="d-flex align-items-center mb-3">
+          <h3 class="fw-bold text-secondary mb-0">
+            <i class="bi bi-archive me-2"></i>Viajes Cerrados o Concluidos
+          </h3>
+          <span class="badge bg-secondary ms-2">{{ gruposCerrados.length }}</span>
+        </div>
+        <p class="text-muted mb-3">Viajes que ya han finalizado</p>
+
+        <div class="row g-4">
+          @for (grupo of gruposCerrados; track grupo.idGrupo) {
+            <div class="col-12 col-md-6 col-lg-4">
+              <div class="card h-100 border-light hover-shadow opacity-75">
+                <!-- Imagen -->
+                <div class="position-relative">
+                  <img [src]="getImagenUrl(grupo)"
+                       class="card-img-top object-cover"
+                       alt="Imagen del viaje"
+                       style="height: 200px;">
+
+                  <!-- Badge destino -->
+                  @if (grupo.viaje?.destinoPrincipal) {
+                    <span class="badge bg-primary position-absolute top-0 start-0 m-2">
+                      <i class="bi bi-geo-alt me-1"></i>{{ grupo.viaje!.destinoPrincipal }}
+                    </span>
+                  }
+
+                  <!-- Badge rol -->
+                  <span class="badge position-absolute bottom-0 end-0 m-2"
+                        [ngClass]="grupo.creador?.idUsuario ? 'bg-warning text-dark' : 'bg-info'">
+                    <i [class]="grupo.creador?.idUsuario ? 'bi bi-star-fill me-1' : 'bi bi-person-check me-1'"></i>
+                    {{ grupo.creador?.idUsuario ? 'Organizador' : 'Participante' }}
+                  </span>
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title fw-bold mb-2">{{ grupo.nombreViaje }}</h5>
+
+                  <!-- Fechas -->
+                  @if (grupo.viaje) {
+                    <div class="d-flex align-items-center text-muted mb-2">
+                      <i class="bi bi-calendar me-2 text-primary"></i>
+                      <small>
+                        <span class="fw-medium">Inicio:</span> {{ formatearFecha(grupo.viaje.fechaInicio) }} •
+                        <span class="fw-medium">Fin:</span> {{ formatearFecha(grupo.viaje.fechaFin) }}
+                      </small>
+                    </div>
+                  }
+
+                  <!-- Participantes -->
+                  <div class="d-flex align-items-center text-muted mb-2">
+                    <i class="bi bi-people me-2 text-primary"></i>
+                    <small>
+                      <span class="fw-medium">Participantes:</span>
+                      {{ (grupo.participantes?.length || 0) + 1 }} de {{ grupo.maxParticipantes }}
+                    </small>
+                  </div>
+
+                  <!-- Descripción -->
+                  @if (grupo.viaje?.descripcion) {
+                    <p class="card-text text-muted small mb-3">
+                      {{ abreviarTexto(grupo.viaje!.descripcion) }}
+                    </p>
+                  }
+
+                  <!-- Botones de acción -->
+                  <div class="d-flex justify-content-between align-items-center mt-auto">
+                    <div class="btn-group">
+                      <button class="btn btn-outline-primary btn-sm" (click)="verDetalle(grupo.idGrupo)">
+                        <i class="bi bi-eye me-1"></i>Ver Detalles
+                      </button>
+                      <button class="btn btn-outline-success btn-sm" (click)="irACalificaciones(grupo.idGrupo)">
+                        <i class="bi bi-star me-1"></i>Calificar
+                      </button>
+                    </div>
+
+                    <span class="badge bg-secondary">
+                      <i class="bi bi-check-circle me-1"></i>Finalizado
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Estado vacío -->
+    @if (!tieneGrupos()) {
+      <div class="text-center py-5">
+        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle p-4 mb-4">
+          <i class="bi bi-geo-alt fs-1 text-primary"></i>
+        </div>
+        <h3 class="fw-bold mb-2">Aún no tienes viajes</h3>
+        <p class="text-muted mb-4 mx-auto" style="max-width: 500px;">
+          Explora los grupos disponibles y únete a uno que se ajuste a tus intereses, o crea tu propio grupo de viaje.
+        </p>
+        <div class="d-flex gap-3 justify-content-center">
+          <button class="btn btn-primary" (click)="irABuscarGrupos()">
+            <i class="bi bi-search me-1"></i>Buscar grupos
+          </button>
+          <button class="btn btn-outline-primary" (click)="irACrearGrupo()">
+            <i class="bi bi-plus-circle me-1"></i>Crear grupo
+          </button>
+        </div>
+      </div>
+    }
+  }
+</div>

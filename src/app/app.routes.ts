@@ -9,6 +9,7 @@ import { GruposComponent } from './components/grupos/grupos.component';
 import { GrupoDetalleComponent } from './components/grupos/grupo-detalle.component';
 import { SolicitudesGrupoComponent } from './components/grupos/solicitudes-grupo.component';
 import { NotificacionesComponent } from './components/notificaciones/notificaciones.component';
+import { MisViajesComponent } from './components/mis-viajes/mis-viajes.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -21,6 +22,7 @@ export const routes: Routes = [
   { path: 'grupos/:id', component: GrupoDetalleComponent },
   { path: 'grupos/:id/solicitudes', component: SolicitudesGrupoComponent, canActivate: [authGuard] },
   // Rutas protegidas
+  { path: 'mis-viajes', component: MisViajesComponent, canActivate: [authGuard] },
   { path: 'notificaciones', component: NotificacionesComponent, canActivate: [authGuard] },
   { path: 'perfil', component: ProfileComponent, canActivate: [authGuard] },
   { path: 'perfil/:id', component: ProfileComponent, canActivate: [authGuard] },
