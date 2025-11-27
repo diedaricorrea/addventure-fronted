@@ -1,0 +1,492 @@
+<!-- Navbar -->
+<app-navbar [homeData]="homeData"></app-navbar>
+
+<!-- Main Content -->
+<main class="container py-4 py-md-5">
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+  } @else if (error) {
+    <div class="alert alert-danger">{{ error }}</div>
+  } @else if (grupo) {
+    <!-- Breadcrumb -->
+    <div class="mb-4">
+      <a routerLink="/grupos" class="text-decoration-none text-primary">
+        <i class="bi bi-arrow-left me-2"></i>Volver a resultados
+      </a>
+    </div>
+
+    <!-- Group Detail Card -->
+    <div class="card shadow-sm border-light mb-5">
+      <!-- Hero Image -->
+      <div class="position-relative">
+        <div class="hero-image"
+          [style.background-image]="'url(' + getImagenDestacadaUrl(grupo.viaje?.imagenDestacada) + ')'">
+          <div class="overlay-gradient"></div>
+        </div>
+        <div class="position-absolute bottom-0 start-0 p-4 text-white">
+          @if (grupo.viaje?.esVerificado) {
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge bg-success">
+                <i class="bi bi-check-circle me-1"></i>Verificado
+              </span>
+            </div>
+          }
+          <h1 class="display-6 fw-bold mb-2">{{ grupo.nombreViaje }}</h1>
+          @if (grupo.viaje?.destinoPrincipal) {
+            <p class="fs-5 d-flex align-items-center">
+              <i class="bi bi-geo-alt me-1"></i> {{ grupo.viaje?.destinoPrincipal }}
+            </p>
+          }
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="card-body p-4">
+        <ul class="nav nav-tabs mb-4" id="groupTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="info-tab" data-bs-toggle="tab"
+              data-bs-target="#info-tab-pane" type="button" role="tab">
+              Información
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="chat-tab" data-bs-toggle="tab" data-bs-target="#chat-tab-pane"
+              type="button" role="tab">
+              Chat del grupo <span class="d-none d-md-inline">(Únete primero)</span>
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content" id="groupTabsContent">
+          <!-- Info Tab -->
+          <div class="tab-pane fade show active" id="info-tab-pane" role="tabpanel" aria-labelledby="info-tab"
+            tabindex="0">
+            <div class="row">
+              <!-- Main Content -->
+              <div class="col-md-8 mb-4 mb-md-0">
+                <!-- Description -->
+                <div class="mb-5">
+                  <h2 class="fs-3 fw-bold mb-3">Descripción</h2>
+                  <p class="text-secondary">{{ grupo.viaje?.descripcion }}</p>
+                </div>
+
+                <!-- Itinerary -->
+                @if (itinerarios && itinerarios.length > 0) {
+                  <div class="mb-5">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h2 class="fs-3 fw-bold mb-0">Itinerario del viaje</h2>
+                      <span class="badge bg-primary">{{ itinerarios.length }} días</span>
+                    </div>
+
+                    <div class="accordion" id="itinerarioAccordion">
+                      @for (itinerario of itinerarios; track itinerario.idItinerario; let i = $index) {
+                        <div class="accordion-item mb-3">
+                          <h2 class="accordion-header" [id]="'heading' + itinerario.diaNumero">
+                            <button class="accordion-button" [class.collapsed]="i !== 0" type="button"
+                              data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse' + itinerario.diaNumero"
+                              [attr.aria-expanded]="i === 0" [attr.aria-controls]="'collapse' + itinerario.diaNumero">
+                              <div class="d-flex align-items-center w-100">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                                  style="width: 32px; height: 32px; min-width: 32px;">
+                                  {{ itinerario.diaNumero }}
+                                </div>
+                                <div class="flex-grow-1">
+                                  <strong>{{ itinerario.titulo }}</strong>
+                                  @if (itinerario.duracionEstimada) {
+                                    <div class="small text-muted">Duración: {{ itinerario.duracionEstimada }}</div>
+                                  }
+                                </div>
+                              </div>
+                            </button>
+                          </h2>
+                          <div [id]="'collapse' + itinerario.diaNumero"
+                            [class]="i === 0 ? 'accordion-collapse collapse show' : 'accordion-collapse collapse'"
+                            [attr.aria-labelledby]="'heading' + itinerario.diaNumero" data-bs-parent="#itinerarioAccordion">
+                            <div class="accordion-body">
+                              @if (itinerario.descripcion) {
+                                <div class="mb-3">
+                                  <h6 class="fw-semibold text-dark mb-2">
+                                    <i class="bi bi-card-text me-2 text-primary"></i>Descripción de actividades
+                                  </h6>
+                                  <p class="mb-0 text-secondary">{{ itinerario.descripcion }}</p>
+                                </div>
+                              }
+
+                              @if (itinerario.puntoPartida || itinerario.puntoLlegada) {
+                                <div class="row">
+                                  @if (itinerario.puntoPartida) {
+                                    <div class="col-md-6 mb-3">
+                                      <h6 class="fw-semibold text-dark mb-2">
+                                        <i class="bi bi-geo-alt me-2 text-success"></i>Punto de partida
+                                      </h6>
+                                      <p class="mb-0 text-secondary">{{ itinerario.puntoPartida }}</p>
+                                    </div>
+                                  }
+                                  @if (itinerario.puntoLlegada) {
+                                    <div class="col-md-6 mb-3">
+                                      <h6 class="fw-semibold text-dark mb-2">
+                                        <i class="bi bi-geo-alt-fill me-2 text-danger"></i>Punto de llegada
+                                      </h6>
+                                      <p class="mb-0 text-secondary">{{ itinerario.puntoLlegada }}</p>
+                                    </div>
+                                  }
+                                </div>
+                              }
+
+                              @if (itinerario.duracionEstimada) {
+                                <div class="mb-0">
+                                  <h6 class="fw-semibold text-dark mb-2">
+                                    <i class="bi bi-clock me-2 text-warning"></i>Duración estimada
+                                  </h6>
+                                  <span class="badge bg-outline-primary text-primary border border-primary">
+                                    {{ itinerario.duracionEstimada }}
+                                  </span>
+                                </div>
+                              }
+                            </div>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+
+                <!-- Members -->
+                <div>
+                  <h2 class="fs-3 fw-bold mb-3">Miembros del grupo</h2>
+                  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                    <!-- Organizador -->
+                    <div class="col">
+                      <div class="member-card text-center position-relative h-100">
+                        <div class="avatar-det bg-primary text-white mx-auto mb-2">
+                          @if (grupo.creador?.fotoPerfil) {
+                            <img [src]="homeService.getImageUrl(grupo.creador.fotoPerfil)" alt="Perfil" />
+                          } @else {
+                            <div class="avatar-content">{{ grupo.creador?.iniciales }}</div>
+                          }
+                        </div>
+                        <a class="fw-medium text-black opacity-75 text-decoration-none"
+                          [routerLink]="['/perfil', grupo.creador?.idUsuario]">
+                          {{ grupo.creador?.nombreCompleto }}
+                        </a>
+                        <div class="organizer-label mt-2">Organizador</div>
+                      </div>
+                    </div>
+
+                    <!-- Participantes -->
+                    @for (participante of grupo.participantes; track participante.idUsuario) {
+                      <div class="col">
+                        <div class="member-card text-center position-relative h-100">
+                          <div class="avatar-det bg-secondary text-dark mx-auto mb-2 position-relative">
+                            @if (participante.fotoPerfil) {
+                              <img [src]="homeService.getImageUrl(participante.fotoPerfil)" alt="Perfil" />
+                            } @else {
+                              <div class="avatar-content">{{ participante.iniciales }}</div>
+                            }
+                          </div>
+                          <div class="fw-medium">{{ participante.nombreCompleto }}</div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sidebar -->
+              <div class="col-md-4">
+                <!-- Trip Details -->
+                <div class="card mb-4 border-light shadow-sm">
+                  <div class="card-body">
+                    <h3 class="fs-5 fw-bold mb-3">Detalles del viaje</h3>
+
+                    <div class="mb-3">
+                      <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-calendar3 text-primary fs-5 me-3"></i>
+                        <div>
+                          <p class="text-muted small mb-0">Fechas</p>
+                          <p class="fw-medium mb-0">
+                            {{ grupo.viaje?.fechaInicio }} - {{ grupo.viaje?.fechaFin }}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-people text-primary fs-5 me-3"></i>
+                        <div>
+                          <p class="text-muted small mb-0">Participantes</p>
+                          <p class="fw-medium mb-0">
+                            {{ grupo.totalParticipantes }} de {{ grupo.maxParticipantes }}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Etiquetas -->\n                @if (grupo.etiquetas && grupo.etiquetas.length > 0) {
+                  <div class="card mb-4 border-light shadow-sm">
+                    <div class="card-body">
+                      <h3 class="fs-5 fw-bold mb-3">Etiquetas</h3>
+                      <div class="d-flex flex-wrap gap-2">
+                        @for (etiqueta of grupo.etiquetas; track etiqueta) {
+                          <span class="badge bg-light text-dark border">{{ etiqueta }}</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                }
+
+                <!-- Action Buttons -->
+                <div class="d-grid gap-3">
+                  <!-- Estado de solicitud pendiente -->
+                  @if (permisos.estadoSolicitud === 'PENDIENTE') {
+                    <div class="alert alert-warning">
+                      <i class="bi bi-clock me-2"></i> Solicitud enviada. Esperando aprobación del líder.
+                    </div>
+                  }
+
+                  <!-- Estado de solicitud rechazada -->
+                  @if (permisos.estadoSolicitud === 'RECHAZADO') {
+                    <div class="alert alert-danger">
+                      <i class="bi bi-x-circle me-2"></i> Tu solicitud fue rechazada.
+                    </div>
+                    <button class="btn btn-outline-primary" (click)="unirseGrupo()">
+                      <i class="bi bi-arrow-clockwise me-2"></i> Volver a solicitar
+                    </button>
+                  }
+
+                  <!-- Botón para unirse al grupo -->
+                  @if (permisos.puedeUnirse) {
+                    <button class="btn btn-primary" (click)="unirseGrupo()">
+                      <i class="bi bi-people me-2"></i> Unirse al grupo
+                    </button>
+                  }
+
+                  <!-- Botón para abandonar grupo -->
+                  @if (permisos.puedeAbandonar) {
+                    <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#leaveGroupModal">
+                      <i class="bi bi-box-arrow-right me-2"></i> Abandonar grupo
+                    </button>
+                  }
+
+                  <!-- Botón para editar grupo -->
+                  @if (permisos.puedeEditar) {
+                    <a [routerLink]="['/grupos/editar', grupo.idGrupo]" class="btn btn-outline-secondary">
+                      <i class="bi bi-pencil me-2"></i> Editar grupo
+                    </a>
+                  }
+
+                  <!-- Botón para calificar viajeros -->
+                  @if (permisos.puedeCalificar) {
+                    <a [routerLink]="['/calificaciones/grupo', grupo.idGrupo]" class="btn btn-outline-primary">
+                      <i class="bi bi-star me-2"></i> Calificar viajeros
+                    </a>
+                  }
+
+                  <!-- Botón para cerrar viaje -->
+                  @if (permisos.puedeCerrar) {
+                    <button class="btn btn-outline-warning" (click)="cerrarViaje()">
+                      <i class="bi bi-lock me-2"></i> Cerrar viaje
+                    </button>
+                  }
+
+                  <!-- Botón para eliminar grupo -->
+                  @if (permisos.puedeEliminar) {
+                    <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteGroupModal">
+                      <i class="bi bi-trash me-2"></i> Eliminar grupo
+                    </button>
+                  }
+
+                  <!-- Ver galería -->
+                  @if (permisos.puedeVerGaleria) {
+                    <a [routerLink]="['/grupos', grupo.idGrupo, 'galeria-fotos']" class="btn btn-outline-info">
+                      <i class="bi bi-images me-2"></i> Ver galería de fotos
+                    </a>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chat Tab -->
+          <div class="tab-pane fade" id="chat-tab-pane" role="tabpanel" aria-labelledby="chat-tab"
+            tabindex="0">
+            <div class="alert alert-primary d-flex align-items-center mb-4" role="alert">
+              <i class="bi bi-info-circle me-2 fs-5"></i>
+              <div>
+                <h5 class="alert-heading mb-1">Foro del grupo</h5>
+                <p class="mb-0">Este es un espacio para que los miembros del grupo coordinen detalles
+                  del viaje, hagan preguntas y se conozcan mejor antes de la aventura.</p>
+              </div>
+            </div>
+
+            <div class="card border-light shadow-sm">
+              <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-chat-square-text me-2"></i>
+                  <h5 class="mb-0">Chat de grupo: {{ grupo.nombreViaje }}</h5>
+                </div>
+                <span class="badge bg-white text-primary">
+                  {{ grupo.totalParticipantes }} participantes
+                </span>
+              </div>
+
+              <div class="card-body p-0" style="height: 500px; display: flex; flex-direction: column;">
+                <div class="chat-container p-3 flex-grow-1" id="chatMessages"
+                  style="overflow-y: auto; max-height: 100%;">
+                  <!-- Mensaje si no tiene acceso al chat -->
+                  @if (!permisos.puedeAccederChat) {
+                    <div class="alert alert-info text-center">
+                      <i class="bi bi-lock me-2"></i>
+                      Debes unirte al grupo para acceder al chat
+                    </div>
+                  }
+
+                  <!-- Mensajes del chat -->
+                  @if (permisos.puedeAccederChat) {
+                    @if (mensajes.length === 0) {
+                      <div class="text-center text-muted py-5">
+                        <i class="bi bi-chat-dots fs-1"></i>
+                        <p class="mt-2">No hay mensajes aún. ¡Sé el primero en escribir!</p>
+                      </div>
+                    }
+
+                    @for (mensaje of mensajes; track mensaje.idMensaje) {
+                      <div class="mb-3">
+                        <div class="d-flex align-items-start">
+                          <div class="me-3">
+                            <div class="avatar-circle bg-primary text-white">
+                              @if (mensaje.remitente?.fotoPerfil) {
+                                <img [src]="homeService.getImageUrl(mensaje.remitente.fotoPerfil)" alt="Perfil" />
+                              } @else {
+                                {{ mensaje.remitente?.nombre?.charAt(0) || 'U' }}
+                              }
+                            </div>
+                          </div>
+                          <div class="flex-grow-1">
+                            <div class="d-flex align-items-center mb-1">
+                              <strong class="me-2">
+                                {{ mensaje.remitente?.nombre }} {{ mensaje.remitente?.apellidos }}
+                              </strong>
+                              <small class="text-muted">
+                                {{ formatDate(mensaje.fechaEnvio) }}
+                              </small>
+                            </div>
+                            <div class="message-content bg-light p-3 rounded-3">
+                              @if (mensaje.tipoMensaje === 'imagen') {
+                                <img [src]="mensaje.archivoUrl" class="img-fluid rounded mb-2"
+                                  style="max-width: 250px;" />
+                              }
+                              <p class="mb-0">{{ mensaje.mensaje }}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  }
+                </div>
+
+                <!-- Chat Input - Solo si puede enviar mensajes -->
+                @if (permisos.puedeAccederChat) {
+                  <div class="p-3 border-top bg-white" style="flex-shrink: 0;">
+                    <div class="input-group mb-2">
+                      <input type="text" class="form-control" placeholder="Escribe un mensaje..."
+                        #chatInput (keypress)="onChatKeypress($event)">
+                      <button class="btn btn-primary" type="button" (click)="enviarMensaje(chatInput.value)">
+                        <i class="bi bi-send"></i>
+                      </button>
+                    </div>
+                    <div class="d-flex align-items-center">
+                      <input type="file" #imageInput class="form-control" accept="image/*" style="display: none;"
+                        (change)="enviarImagen($event)">
+                      <button class="btn btn-outline-secondary btn-sm me-2" type="button"
+                        (click)="imageInput.click()">
+                        <i class="bi bi-image"></i> Enviar imagen
+                      </button>
+                      <small class="text-muted">Envía mensajes y fotos del viaje</small>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</main>
+
+<!-- Modal: Abandonar Grupo -->
+<div class="modal fade" id="leaveGroupModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Salir del grupo
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Estás a punto de abandonar el grupo <strong>{{ grupo?.nombreViaje }}</strong>. ¿Estás seguro?</p>
+        <div class="alert alert-warning d-flex align-items-start">
+          <i class="bi bi-exclamation-triangle me-2 mt-1"></i>
+          <span>Al salir del grupo perderás acceso al chat y a la información de contacto de los demás
+            miembros. Si deseas volver a unirte, deberás solicitar acceso nuevamente.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="abandonarGrupo()" data-bs-dismiss="modal">
+          <i class="bi bi-box-arrow-right me-2"></i>Salir del grupo
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Eliminar Grupo -->
+<div class="modal fade" id="deleteGroupModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-danger">
+          <i class="bi bi-exclamation-triangle me-2"></i>Eliminar grupo
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Estás a punto de eliminar el grupo <strong>{{ grupo?.nombreViaje }}</strong>.</p>
+        <div class="alert alert-danger d-flex align-items-start mb-3">
+          <i class="bi bi-exclamation-triangle me-2 mt-1"></i>
+          <div>
+            <strong>¡Atención!</strong> Esta acción no se puede deshacer.
+            <ul class="mb-0 mt-2">
+              <li>Se eliminará toda la información del grupo</li>
+              <li>Se perderá el historial del chat</li>
+              <li>Los participantes serán notificados</li>
+            </ul>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="deleteConfirmText" class="form-label">
+            Para confirmar, escribe "<strong>ELIMINAR</strong>" en el siguiente campo:
+          </label>
+          <input type="text" class="form-control" id="deleteConfirmText" placeholder="Escribe ELIMINAR"
+            [(ngModel)]="deleteConfirmText">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" [disabled]="deleteConfirmText !== 'ELIMINAR'"
+          (click)="eliminarGrupo()">
+          <i class="bi bi-trash me-2"></i>Eliminar grupo permanentemente
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

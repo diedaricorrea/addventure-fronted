@@ -30,4 +30,12 @@ export class HomeService {
   refreshHomeData(): void {
     this.getHomeData().subscribe();
   }
+
+  // Método para obtener URL de imagen de perfil
+  getImageUrl(fotoPerfil: string | null | undefined): string {
+    if (!fotoPerfil) {
+      return '';
+    }
+    return `http://localhost:8080/uploads/${fotoPerfil}`;
+  }
 }

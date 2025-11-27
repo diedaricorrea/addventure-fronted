@@ -1,0 +1,247 @@
+<!-- Navbar -->
+<app-navbar [homeData]="homeData"></app-navbar>
+
+<!-- Main Content -->
+<main class="bg-light py-4 py-md-5">
+  <div class="container">
+    <!-- Hero para crear nuevo grupo -->
+    <div class="card mb-4 border-0 rounded-4 overflow-hidden shadow-lg">
+      <div class="position-relative">
+        <div class="overlay-gradient"></div>
+        <img src="/images/aventurero.jpg" alt="Grupo de viajeros" class="img-cover card-img w-100 object-cover"
+          style="height: 300px;">
+
+        <div class="card-img-overlay d-flex flex-column justify-content-center text-white p-4 p-md-5">
+          <h1 class="display-5 fw-bold mb-3">¿No encuentras el grupo perfecto para ti?</h1>
+          <p class="lead mb-4 text-light">Crea tu propio grupo de viaje, define el destino, las fechas y
+            encuentra compañeros con tus mismos intereses.</p>
+          <div>
+            <a routerLink="/crear-grupo" class="btn btn-light btn-lg text-primary">
+              <i class="bi bi-plus-circle me-2"></i>Crear nuevo grupo
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="fw-bold mb-4">Buscar Grupos de Viaje</h2>
+
+    <!-- Filtros -->
+    <div class="card mb-4 border-light shadow-sm">
+      <div class="card-body p-4">
+        <ul class="nav nav-tabs mb-4" id="searchTabs" role="tablist">
+          <li class="nav-item flex-fill text-center" role="presentation">
+            <button class="nav-link active w-100" id="quick-search-tab" data-bs-toggle="tab"
+              data-bs-target="#quick-search" type="button" role="tab">Búsqueda rápida</button>
+          </li>
+        </ul>
+
+        <div class="tab-content" id="searchTabsContent">
+          <!-- Búsqueda rápida -->
+          <div class="tab-pane fade show active" id="quick-search" role="tabpanel">
+            <form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
+              <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                  <label for="destino" class="form-label">¿A dónde quieres ir?</label>
+                  <input type="text" class="form-control form-control-lg" id="destino" formControlName="destinoPrincipal"
+                    placeholder="Ej: Piura">
+                </div>
+                <div class="col-md-3">
+                  <label for="fechaInicio" class="form-label">Fecha de inicio</label>
+                  <input type="date" class="form-control form-control-lg" id="fechaInicio" formControlName="fechaInicio"
+                    [min]="minDate">
+                </div>
+                <div class="col-md-3">
+                  <label for="fechaFin" class="form-label">Fecha de fin</label>
+                  <input type="date" class="form-control form-control-lg" id="fechaFin" formControlName="fechaFin"
+                    [min]="minDate">
+                </div>
+                <div class="col-md-3">
+                  <label for="ordenar" class="form-label">Ordenar</label>
+                  <select formControlName="sort" id="ordenar" class="form-select form-select-lg"
+                    (change)="onSortChange()">
+                    <option value="">Seleccionar</option>
+                    <option value="destinoPrincipal">Destino</option>
+                    <option value="fechaInicio">Más próximos</option>
+                  </select>
+                </div>
+              </div>
+              <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-lg px-5" [disabled]="loading">
+                  @if (loading) {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                  } @else {
+                    <i class="bi bi-search me-2"></i>
+                  }
+                  Buscar Grupos
+                </button>
+              </div>
+            </form>
+            @if (error) {
+              <div class="alert alert-danger text-center mt-3">
+                {{ error }}
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resultados de búsqueda -->
+    <div class="mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 class="fw-semibold mb-1">Resultados de búsqueda</h3>
+          <p class="text-muted">
+            Se encontraron {{ grupos.length }} grupos que coinciden con tu búsqueda
+          </p>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <!-- Grupos de viaje -->
+        @for (grupo of grupos; track grupo.idGrupo) {
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-light hover-shadow">
+              <div class="position-relative">
+                <img [src]="getImagenDestacadaUrl(grupo.viaje?.imagenDestacada)" class="card-img-top"
+                  [alt]="grupo.nombreViaje">
+                @if (grupo.viaje?.destinoPrincipal) {
+                  <span class="badge bg-primary position-absolute top-0 start-0 m-2">
+                    <i class="bi bi-geo-alt me-1"></i>
+                    {{ grupo.viaje?.destinoPrincipal }}
+                  </span>
+                }
+                @if (grupo.viaje?.esVerificado) {
+                  <span class="badge bg-success position-absolute top-0 end-0 m-2">
+                    <i class="bi bi-check-circle me-1"></i>Verificado
+                  </span>
+                }
+              </div>
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <h5 class="card-title fw-bold">{{ grupo.nombreViaje }}</h5>
+                </div>
+
+                @if (grupo.viaje) {
+                  <div class="d-flex align-items-center text-muted mb-2">
+                    <i class="bi bi-calendar me-2 text-primary"></i>
+                    <small>
+                      <span class="fw-medium">Inicio:</span>
+                      {{ formatDate(grupo.viaje.fechaInicio) }} •
+                      <span class="fw-medium">Fin:</span>
+                      {{ formatDate(grupo.viaje.fechaFin) }}
+                    </small>
+                  </div>
+                }
+
+                <div class="d-flex align-items-center text-muted mb-2">
+                  <i class="bi bi-people me-2 text-primary"></i>
+                  <small>
+                    <span class="fw-medium">Participantes:</span>
+                    {{ grupo.totalParticipantes }} de {{ grupo.maxParticipantes }}
+                    <span>•</span>
+                    <span class="fw-medium">Edad:</span>
+                    @if (grupo.viaje) {
+                      {{ grupo.viaje.rangoEdadMin || 18 }}-{{ grupo.viaje.rangoEdadMax || 60 }}
+                    } @else {
+                      Todas las edades
+                    }
+                  </small>
+                </div>
+
+                @if (grupo.viaje?.descripcion) {
+                  <p class="card-text text-muted small mb-3">
+                    {{ truncateText(grupo.viaje?.descripcion, 100) }}
+                  </p>
+                }
+
+                <div class="d-flex mb-3">
+                  <div class="avatar-group">
+                    <!-- Creador -->
+                    <div class="avatar-circle bg-primary text-white">
+                      @if (grupo.creador.fotoPerfil) {
+                        <img [src]="getImageUrl(grupo.creador.fotoPerfil)" alt="Imagen de perfil" />
+                      } @else {
+                        <div class="avatar-content">{{ grupo.creador.iniciales }}</div>
+                      }
+                    </div>
+                    <!-- Participantes (hasta 3) -->
+                    @for (participante of grupo.participantes.slice(0, 3); track participante.idUsuario) {
+                      <div class="avatar-circle bg-light">
+                        @if (participante.fotoPerfil) {
+                          <img [src]="getImageUrl(participante.fotoPerfil)" alt="Imagen de perfil" />
+                        } @else {
+                          <div class="avatar-content">{{ participante.iniciales }}</div>
+                        }
+                      </div>
+                    }
+                    <!-- Mostrar +X si hay más participantes -->
+                    @if (grupo.participantes.length > 3) {
+                      <div class="avatar-circle bg-primary-soft text-primary">
+                        <span>+{{ grupo.participantes.length - 3 }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                @if (grupo.etiquetas && grupo.etiquetas.length > 0) {
+                  <div class="d-flex flex-wrap gap-1 mb-3">
+                    @for (etiqueta of grupo.etiquetas; track etiqueta) {
+                      <span class="badge bg-light text-dark">{{ etiqueta }}</span>
+                    }
+                  </div>
+                }
+
+                <a [routerLink]="['/grupos', grupo.idGrupo]" class="btn btn-primary w-100">
+                  Ver detalles <i class="bi bi-chevron-right ms-1"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Mensaje si no hay grupos -->
+      @if (!loading && grupos.length === 0) {
+        <div class="alert alert-info text-center my-5">
+          <i class="bi bi-info-circle-fill me-2"></i>
+          No se encontraron grupos de viaje. ¡Crea uno nuevo!
+        </div>
+      }
+
+      <!-- Paginación -->
+      @if (totalPages > 1) {
+        <div class="d-flex justify-content-center mt-5">
+          <nav aria-label="Paginación de resultados">
+            <ul class="pagination">
+              <!-- Botón anterior -->
+              <li class="page-item" [class.disabled]="currentPage === 0">
+                <a class="page-link" (click)="goToPage(currentPage - 1)" aria-label="Anterior"
+                  style="cursor: pointer;">
+                  <span aria-hidden="true"><i class="bi bi-chevron-left"></i></span>
+                </a>
+              </li>
+              <!-- Números de páginas -->
+              @for (i of getPagesArray(); track i) {
+                <li class="page-item" [class.active]="i === currentPage">
+                  <a class="page-link" (click)="goToPage(i)" style="cursor: pointer;">{{ i + 1 }}</a>
+                </li>
+              }
+              <!-- Botón siguiente -->
+              <li class="page-item" [class.disabled]="currentPage + 1 >= totalPages">
+                <a class="page-link" (click)="goToPage(currentPage + 1)" aria-label="Siguiente"
+                  style="cursor: pointer;">
+                  <span aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      }
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<app-footer></app-footer>

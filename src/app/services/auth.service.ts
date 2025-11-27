@@ -11,14 +11,32 @@ import { AuthResponse, LoginRequest, RegisterRequest, UserInfo } from '../models
 export class AuthService {
   private readonly TOKEN_KEY = 'auth_token';
   private readonly USER_KEY = 'user_info';
-  
+
   private currentUserSubject = new BehaviorSubject<UserInfo | null>(this.getUserFromStorage());
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(
     private http: HttpClient,
     private router: Router
-  ) {}
+  ) {
+    // Verificar autenticación al iniciar
+    this.checkAuthOnInit();
+  }
+
+  private checkAuthOnInit(): void {
+    const token = this.getToken();
+    if (token && this.isAuthenticated()) {
+      const user = this.getUserFromStorage();
+      if (user) {
+        this.currentUserSubject.next(user);
+      }
+    } else if (token) {
+      // Limpiar si el token expiró (sin redirigir)
+      localStorage.removeItem(this.TOKEN_KEY);
+      localStorage.removeItem(this.USER_KEY);
+      this.currentUserSubject.next(null);
+    }
+  }
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, credentials)
@@ -50,7 +68,7 @@ export class AuthService {
     if (!token) {
       return false;
     }
-    
+
     // Verificar si el token no ha expirado
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -76,7 +94,7 @@ export class AuthService {
     if (!userJson) {
       return null;
     }
-    
+
     try {
       return JSON.parse(userJson);
     } catch {
