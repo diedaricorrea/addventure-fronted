@@ -7,9 +7,13 @@ import { HomeService } from '../../services/home.service';
 import { GruposService } from '../../services/grupos.service';
 import { ChatService } from '../../services/chat.service';
 import { WebSocketService } from '../../services/websocket.service';
+import { SolicitudService } from '../../services/solicitud.service';
 import { HomeData } from '../../models/home-data.model';
 import { GrupoViaje, Itinerario } from '../../models/grupos.model';
 import { Subscription } from 'rxjs';
+import { ToastService } from '../../services/toast.service';
+import { ConfirmService } from '../../services/confirm.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-grupo-detalle',
@@ -52,7 +56,10 @@ export class GrupoDetalleComponent implements OnInit, OnDestroy {
     public homeService: HomeService,
     private gruposService: GruposService,
     private chatService: ChatService,
-    private wsService: WebSocketService
+    private wsService: WebSocketService,
+    private solicitudService: SolicitudService,
+    private toastService: ToastService,
+    private confirmService: ConfirmService
   ) {}
 
   ngOnInit(): void {
@@ -136,6 +143,14 @@ export class GrupoDetalleComponent implements OnInit, OnDestroy {
         console.error('Error en WebSocket:', err);
       }
     });
+
+    // Suscribirse también a las notificaciones de eliminación
+    this.wsService.subscribeToDelete(grupoId).subscribe({
+      next: (data: any) => {
+        console.log('Mensaje eliminado vía WebSocket:', data.idMensaje);
+        this.mensajes = this.mensajes.filter(m => m.idMensaje !== data.idMensaje);
+      }
+    });
   }
 
   scrollToBottom(): void {
@@ -156,18 +171,20 @@ export class GrupoDetalleComponent implements OnInit, OnDestroy {
   unirseGrupo(): void {
     if (!this.grupo) return;
 
-    this.gruposService.unirseGrupo(this.grupo.idGrupo).subscribe({
+    this.solicitudService.unirseGrupo(this.grupo.idGrupo).subscribe({
       next: (response) => {
         if (response.success) {
           this.showSuccessMessage(response.message || 'Solicitud enviada exitosamente');
-          setTimeout(() => window.location.reload(), 1500);
+          // Recargar permisos para actualizar el estado
+          this.loadPermisos(this.grupo!.idGrupo);
         } else {
           this.showErrorMessage(response.error || 'Error al enviar solicitud');
         }
       },
       error: (err) => {
         console.error('Error:', err);
-        this.showErrorMessage('Error al unirse al grupo. Inténtalo de nuevo.');
+        const errorMsg = err.error?.error || 'Error al unirse al grupo. Inténtalo de nuevo.';
+        this.showErrorMessage(errorMsg);
       }
     });
   }
@@ -292,8 +309,42 @@ export class GrupoDetalleComponent implements OnInit, OnDestroy {
     }
   }
 
+  eliminarMensaje(idMensaje: number): void {
+    if (!this.grupo) return;
+
+    if (!confirm('¿Estás seguro de que quieres eliminar este mensaje?')) {
+      return;
+    }
+
+    this.chatService.eliminarMensaje(this.grupo.idGrupo, idMensaje).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          // El mensaje se eliminará vía WebSocket
+          console.log('Mensaje eliminado exitosamente');
+        }
+      },
+      error: (err) => {
+        console.error('Error al eliminar mensaje:', err);
+        this.showErrorMessage('No se pudo eliminar el mensaje');
+      }
+    });
+  }
+
+  puedeEliminarMensaje(mensaje: any): boolean {
+    if (!this.homeData?.authenticated) return false;
+
+    // El usuario puede eliminar si:
+    // 1. Es el creador del mensaje (comparar por email ya que no tenemos idUsuario en homeData)
+    const esCreadorMensaje = mensaje.remitente?.email === this.homeData.email;
+
+    // 2. Es el creador del grupo
+    const esCreadorGrupo = this.permisos.isCreador;
+
+    return esCreadorMensaje || esCreadorGrupo;
+  }
+
   getImagenDestacadaUrl(imagenDestacada: string | null | undefined): string {
-    return imagenDestacada || 'http://localhost:8080/images/default-trip.jpg';
+    return imagenDestacada || `${environment.baseUrl}/images/default-trip.jpg`;
   }
 
   formatDate(dateString: string): string {
@@ -303,10 +354,10 @@ export class GrupoDetalleComponent implements OnInit, OnDestroy {
   }
 
   private showSuccessMessage(message: string): void {
-    alert(`✅ AddVenture: ${message}`);
+    this.toastService.success(message);
   }
 
   private showErrorMessage(message: string): void {
-    alert(`❌ AddVenture: ${message}`);
+    this.toastService.error(message);
   }
 }

@@ -8,6 +8,7 @@ import { HomeService } from '../../services/home.service';
 import { GruposService } from '../../services/grupos.service';
 import { HomeData } from '../../models/home-data.model';
 import { GrupoViaje, GruposFiltros } from '../../models/grupos.model';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-grupos',
@@ -125,11 +126,11 @@ export class GruposComponent implements OnInit {
   }
 
   getImageUrl(fotoPerfil: string | null): string {
-    return fotoPerfil ? `http://localhost:8080/uploads/${fotoPerfil}` : '';
+    return fotoPerfil ? `${environment.baseUrl}/uploads/${fotoPerfil}` : '';
   }
 
   getImagenDestacadaUrl(imagenDestacada: string | null | undefined): string {
-    return imagenDestacada || 'http://localhost:8080/images/default-trip.jpg';
+    return imagenDestacada || `${environment.baseUrl}/images/default-trip.jpg`;
   }
 
   formatDate(dateString: string): string {

@@ -1,0 +1,36 @@
+.list-group-item {
+  border-left: 4px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.list-group-item:not(.bg-light) {
+  border-left-color: #dee2e6;
+}
+
+.list-group-item.bg-light {
+  border-left-color: #0d6efd;
+  background-color: #f8f9fa !important;
+}
+
+.list-group-item:hover {
+  background-color: #f8f9fa;
+  transform: translateX(2px);
+}
+
+.badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.dropdown-toggle::after {
+  display: none;
+}
+
+.btn-link {
+  text-decoration: none;
+}
+
+.btn-link:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 50%;
+}

@@ -1,0 +1,160 @@
+<app-navbar [homeData]="homeData"></app-navbar>
+
+<main class="container py-4 py-md-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10 col-xl-8">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 mb-0">
+          <i class="bi bi-bell me-2"></i>Notificaciones
+        </h1>
+
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-outline-primary" (click)="toggleFiltro()">
+            <i class="bi bi-funnel me-1"></i>
+            {{ mostrarSoloNoLeidas ? 'Mostrar todas' : 'Solo no leídas' }}
+          </button>
+
+          @if (notificaciones.length > 0) {
+            <div class="dropdown">
+              <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                      type="button"
+                      data-bs-toggle="dropdown">
+                <i class="bi bi-three-dots-vertical"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                  <button class="dropdown-item" (click)="marcarTodasComoLeidas()">
+                    <i class="bi bi-check-all me-2"></i>Marcar todas como leídas
+                  </button>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <button class="dropdown-item text-danger" (click)="eliminarTodas()">
+                    <i class="bi bi-trash me-2"></i>Eliminar todas
+                  </button>
+                </li>
+              </ul>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      @if (loading) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+        </div>
+      }
+
+      <!-- Error State -->
+      @else if (error) {
+        <div class="alert alert-danger">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+        </div>
+      }
+
+      <!-- Empty State -->
+      @else if (notificaciones.length === 0) {
+        <div class="text-center py-5">
+          <i class="bi bi-bell-slash fs-1 text-muted mb-3 d-block"></i>
+          <h3 class="h5 text-muted">No tienes notificaciones</h3>
+          <p class="text-muted">
+            {{ mostrarSoloNoLeidas ? 'No tienes notificaciones sin leer' : 'Aquí aparecerán tus notificaciones' }}
+          </p>
+        </div>
+      }
+
+      <!-- Notifications List -->
+      @else {
+        <div class="list-group">
+          @for (notificacion of notificaciones; track notificacion.idNotificacion) {
+            <div class="list-group-item list-group-item-action"
+                 [class.bg-light]="!notificacion.leido"
+                 style="cursor: pointer;">
+
+              <div class="d-flex w-100 justify-content-between align-items-start">
+                <!-- Icono y contenido -->
+                <div class="d-flex gap-3 flex-grow-1"
+                     (click)="notificacion.tipo === 'SOLICITUD_UNION' ? verSolicitudes(notificacion) : navegarAGrupo(notificacion)">
+
+                  <!-- Icono -->
+                  <div class="flex-shrink-0">
+                    <i [class]="'bi fs-3 ' + getIconoNotificacion(notificacion.tipo) + ' ' + getColorNotificacion(notificacion.tipo)"></i>
+                  </div>
+
+                  <!-- Contenido -->
+                  <div class="flex-grow-1">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                      @if (!notificacion.leido) {
+                        <span class="badge bg-primary">Nuevo</span>
+                      }
+                      <small class="text-muted">{{ formatFecha(notificacion.fecha) }}</small>
+                    </div>
+
+                    <p class="mb-1" [class.fw-bold]="!notificacion.leido">
+                      {{ notificacion.contenido }}
+                    </p>
+
+                    @if (notificacion.grupo) {
+                      <small class="text-muted">
+                        <i class="bi bi-geo-alt me-1"></i>{{ notificacion.grupo.nombreViaje }}
+                      </small>
+                    }
+
+                    <!-- Botón de acción para solicitudes de unión -->
+                    @if (notificacion.tipo === 'SOLICITUD_UNION' && notificacion.grupo) {
+                      <div class="mt-2">
+                        <button class="btn btn-sm btn-primary"
+                                (click)="$event.stopPropagation(); verSolicitudes(notificacion)">
+                          <i class="bi bi-eye me-1"></i>Ver solicitud
+                        </button>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <!-- Acciones -->
+                <div class="dropdown ms-2">
+                  <button class="btn btn-sm btn-link text-muted"
+                          type="button"
+                          data-bs-toggle="dropdown"
+                          (click)="$event.stopPropagation()">
+                    <i class="bi bi-three-dots-vertical"></i>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    @if (!notificacion.leido) {
+                      <li>
+                        <button class="dropdown-item"
+                                (click)="$event.stopPropagation(); marcarComoLeida(notificacion)">
+                          <i class="bi bi-check me-2"></i>Marcar como leída
+                        </button>
+                      </li>
+                    }
+                    @if (notificacion.grupo?.idGrupo) {
+                      <li>
+                        <button class="dropdown-item"
+                                (click)="$event.stopPropagation(); navegarAGrupo(notificacion)">
+                          <i class="bi bi-box-arrow-up-right me-2"></i>Ir al grupo
+                        </button>
+                      </li>
+                    }
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                      <button class="dropdown-item text-danger"
+                              (click)="$event.stopPropagation(); eliminarNotificacion(notificacion)">
+                        <i class="bi bi-trash me-2"></i>Eliminar
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</main>

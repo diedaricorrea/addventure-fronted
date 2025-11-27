@@ -1,4 +1,5 @@
 export interface HomeData {
+  idUsuario: number;
   iniciales: string;
   username: string;
   email: string;

@@ -7,6 +7,7 @@ import { PerfilResponse } from '../../models/perfil.model';
 import { HomeData } from '../../models/home-data.model';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-profile',
@@ -90,7 +91,7 @@ export class ProfileComponent implements OnInit {
 
   getImageUrl(imagen: string | undefined): string {
     if (!imagen) return 'images/default-cover.jpg';
-    return `http://localhost:8080/uploads/${imagen}`;
+    return `${environment.baseUrl}/uploads/${imagen}`;
   }
 
   getStars(calificacion: number): boolean[] {

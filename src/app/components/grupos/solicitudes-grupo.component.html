@@ -1,0 +1,125 @@
+<app-navbar [homeData]="homeData"></app-navbar>
+
+<main class="container py-4 py-md-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10 col-xl-8">
+      <!-- Breadcrumb -->
+      <div class="mb-4">
+        <a [routerLink]="['/grupos', idGrupo]" class="text-decoration-none text-primary">
+          <i class="bi bi-arrow-left me-2"></i>Volver al grupo
+        </a>
+      </div>
+
+      <!-- Header -->
+      <div class="mb-4">
+        <h1 class="h2 mb-1">
+          <i class="bi bi-person-check me-2"></i>Solicitudes Pendientes
+        </h1>
+        <p class="text-muted">Revisa y gestiona las solicitudes para unirse a tu grupo</p>
+      </div>
+
+      <!-- Loading State -->
+      @if (loading) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+        </div>
+      }
+
+      <!-- Error State -->
+      @else if (error) {
+        <div class="alert alert-danger">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+        </div>
+      }
+
+      <!-- Empty State -->
+      @else if (solicitudes.length === 0) {
+        <div class="text-center py-5">
+          <i class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
+          <h3 class="h5 text-muted">No hay solicitudes pendientes</h3>
+          <p class="text-muted">Las nuevas solicitudes aparecerán aquí</p>
+          <a [routerLink]="['/grupos', idGrupo]" class="btn btn-primary mt-3">
+            Volver al grupo
+          </a>
+        </div>
+      }
+
+      <!-- Solicitudes List -->
+      @else {
+        <div class="list-group">
+          @for (solicitud of solicitudes; track solicitud.idUsuario) {
+            <div class="list-group-item">
+              <div class="d-flex gap-3 align-items-start">
+                <!-- Avatar -->
+                <div class="flex-shrink-0">
+                  @if (solicitud.fotoPerfil) {
+                    <img [src]="getFotoPerfilUrl(solicitud.fotoPerfil)"
+                         alt="Foto de perfil"
+                         class="rounded-circle"
+                         style="width: 60px; height: 60px; object-fit: cover;">
+                  } @else {
+                    <div class="avatar-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                         style="width: 60px; height: 60px; font-size: 1.5rem;">
+                      {{ solicitud.iniciales }}
+                    </div>
+                  }
+                </div>
+
+                <!-- Contenido -->
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                      <h5 class="mb-1">{{ solicitud.nombreCompleto }}</h5>
+                      <p class="text-muted mb-1 small">
+                        <i class="bi bi-envelope me-1"></i>{{ solicitud.email }}
+                      </p>
+                      <p class="text-muted mb-0 small">
+                        <i class="bi bi-clock me-1"></i>{{ formatFecha(solicitud.fechaSolicitud) }}
+                      </p>
+                    </div>
+
+                    @if (solicitud.intentos > 1) {
+                      <span class="badge bg-warning text-dark">
+                        Intento {{ solicitud.intentos }}/3
+                      </span>
+                    }
+                  </div>
+
+                  <!-- Acciones -->
+                  <div class="d-flex gap-2 flex-wrap mt-3">
+                    <button class="btn btn-sm btn-outline-primary"
+                            (click)="verPerfil(solicitud.idUsuario)">
+                      <i class="bi bi-person me-1"></i>Ver perfil
+                    </button>
+
+                    <button class="btn btn-sm btn-success"
+                            (click)="aceptarSolicitud(solicitud)">
+                      <i class="bi bi-check-circle me-1"></i>Aceptar
+                    </button>
+
+                    <button class="btn btn-sm btn-outline-danger"
+                            (click)="rechazarSolicitud(solicitud)">
+                      <i class="bi bi-x-circle me-1"></i>Rechazar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Stats -->
+        <div class="mt-4 p-3 bg-light rounded">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="text-muted">
+              <i class="bi bi-people me-2"></i>
+              Total de solicitudes pendientes: <strong>{{ solicitudes.length }}</strong>
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</main>

@@ -1,0 +1,28 @@
+.avatar-circle {
+  border-radius: 50%;
+  font-weight: 600;
+}
+
+.list-group-item {
+  border-left: 4px solid #0d6efd;
+  transition: all 0.2s ease;
+}
+
+.list-group-item:hover {
+  background-color: #f8f9fa;
+  transform: translateX(2px);
+}
+
+.badge {
+  font-size: 0.75rem;
+}
+
+@media (max-width: 576px) {
+  .d-flex.gap-2 {
+    flex-direction: column;
+  }
+
+  .btn-sm {
+    width: 100%;
+  }
+}

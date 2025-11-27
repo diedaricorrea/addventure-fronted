@@ -36,6 +36,6 @@ export class HomeService {
     if (!fotoPerfil) {
       return '';
     }
-    return `http://localhost:8080/uploads/${fotoPerfil}`;
+    return `${environment.baseUrl}/uploads/${fotoPerfil}`;
   }
 }
