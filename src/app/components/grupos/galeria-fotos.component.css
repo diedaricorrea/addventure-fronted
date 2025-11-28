@@ -1,0 +1,16 @@
+.imagen-card {
+  transition: transform 0.2s;
+}
+
+.imagen-card:hover {
+  transform: translateY(-5px);
+}
+
+.imagen-preview {
+  transition: opacity 0.2s;
+}
+
+.imagen-preview:hover {
+  opacity: 0.85;
+}
+

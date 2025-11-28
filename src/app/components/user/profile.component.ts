@@ -91,6 +91,23 @@ export class ProfileComponent implements OnInit {
 
   getImageUrl(imagen: string | undefined): string {
     if (!imagen) return 'images/default-cover.jpg';
+    if (imagen.startsWith('http://') || imagen.startsWith('https://')) {
+      return imagen;
+    }
+    if (imagen.startsWith('/uploads/')) {
+      return `${environment.baseUrl}${imagen}`;
+    }
+    return `${environment.baseUrl}/uploads/${imagen}`;
+  }
+
+  getAutorImageUrl(imagen: string | undefined): string {
+    if (!imagen) return '';
+    if (imagen.startsWith('http://') || imagen.startsWith('https://')) {
+      return imagen;
+    }
+    if (imagen.startsWith('/uploads/')) {
+      return `${environment.baseUrl}${imagen}`;
+    }
     return `${environment.baseUrl}/uploads/${imagen}`;
   }
 

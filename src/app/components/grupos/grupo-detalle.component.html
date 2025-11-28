@@ -395,9 +395,10 @@
                     }
 
                     @for (mensaje of mensajes; track mensaje.idMensaje) {
-                      <div class="mb-3">
-                        <div class="d-flex align-items-start">
-                          <div class="me-3">
+                      <div class="mb-3 d-flex" [class.justify-content-end]="esMensajePropio(mensaje)">
+                        <div class="d-flex align-items-start" style="max-width: 70%;"
+                             [class.flex-row-reverse]="esMensajePropio(mensaje)">
+                          <div [class.me-2]="!esMensajePropio(mensaje)" [class.ms-2]="esMensajePropio(mensaje)">
                             <div class="avatar-circle bg-primary text-white">
                               @if (mensaje.remitente?.fotoPerfil) {
                                 <img [src]="homeService.getImageUrl(mensaje.remitente.fotoPerfil)" alt="Perfil" />
@@ -407,30 +408,44 @@
                             </div>
                           </div>
                           <div class="flex-grow-1">
-                            <div class="d-flex align-items-center justify-content-between mb-1">
-                              <div class="d-flex align-items-center">
-                                <strong class="me-2">
+                            <div class="d-flex align-items-center mb-1 gap-2"
+                                 [class.justify-content-end]="esMensajePropio(mensaje)">
+                              <div class="d-flex align-items-center gap-2" [class.flex-row-reverse]="esMensajePropio(mensaje)">
+                                <strong class="small">
                                   {{ mensaje.remitente?.nombre }} {{ mensaje.remitente?.apellidos }}
                                 </strong>
                                 <small class="text-muted">
                                   {{ formatDate(mensaje.fechaEnvio) }}
                                 </small>
                               </div>
-                              <!-- Botón eliminar -->
-                              @if (puedeEliminarMensaje(mensaje)) {
-                                <button class="btn btn-sm btn-outline-danger"
+                              <!-- Botón eliminar para mensajes de otros -->
+                              @if (puedeEliminarMensaje(mensaje) && !esMensajePropio(mensaje)) {
+                                <button class="btn btn-sm btn-link text-danger p-0"
                                         (click)="eliminarMensaje(mensaje.idMensaje)"
                                         title="Eliminar mensaje">
                                   <i class="bi bi-trash"></i>
                                 </button>
                               }
                             </div>
-                            <div class="message-content bg-light p-3 rounded-3">
+                            <div class="message-content p-3 rounded-3 position-relative"
+                                 [class.bg-primary]="esMensajePropio(mensaje)"
+                                 [class.text-white]="esMensajePropio(mensaje)"
+                                 [class.bg-light]="!esMensajePropio(mensaje)">
                               @if (mensaje.tipoMensaje === 'imagen') {
-                                <img [src]="mensaje.archivoUrl" class="img-fluid rounded mb-2"
-                                  style="max-width: 250px;" />
+                                <img [src]="getImageUrl(mensaje.archivoUrl)" class="img-fluid rounded mb-2"
+                                  style="max-width: 100%;"
+                                  [alt]="mensaje.archivoNombre || 'Imagen compartida'" />
                               }
                               <p class="mb-0">{{ mensaje.mensaje }}</p>
+                              <!-- Botón eliminar para mensajes propios -->
+                              @if (esMensajePropio(mensaje)) {
+                                <button class="btn btn-sm btn-link text-white-50 p-0 position-absolute"
+                                        style="top: 8px; right: 8px; font-size: 0.85rem;"
+                                        (click)="eliminarMensaje(mensaje.idMensaje)"
+                                        title="Eliminar mensaje">
+                                  <i class="bi bi-trash"></i>
+                                </button>
+                              }
                             </div>
                           </div>
                         </div>
@@ -439,8 +454,8 @@
                   }
                 </div>
 
-                <!-- Chat Input - Solo si puede enviar mensajes -->
-                @if (permisos.puedeAccederChat) {
+                <!-- Chat Input - Solo si puede enviar mensajes y el viaje NO está cerrado/concluido -->
+                @if (permisos.puedeAccederChat && grupo && grupo.estado !== 'cerrado' && grupo.estado !== 'concluido') {
                   <div class="p-3 border-top bg-white" style="flex-shrink: 0;">
                     <div class="input-group mb-2">
                       <input type="text" class="form-control" placeholder="Escribe un mensaje..."
@@ -458,6 +473,16 @@
                       </button>
                       <small class="text-muted">Envía mensajes y fotos del viaje</small>
                     </div>
+                  </div>
+                }
+                
+                <!-- Mensaje cuando el chat está cerrado -->
+                @if (permisos.puedeAccederChat && grupo && (grupo.estado === 'cerrado' || grupo.estado === 'concluido')) {
+                  <div class="p-3 border-top bg-light text-center" style="flex-shrink: 0;">
+                    <small class="text-muted">
+                      <i class="bi bi-lock me-1"></i>
+                      El chat está cerrado. Este viaje ha finalizado.
+                    </small>
                   </div>
                 }
               </div>

@@ -1,0 +1,103 @@
+<app-navbar></app-navbar>
+
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="d-flex align-items-center mb-4">
+        <a [routerLink]="['/grupos', idGrupo]" class="btn btn-link text-decoration-none">
+          <i class="bi bi-arrow-left me-2"></i> Volver al grupo
+        </a>
+      </div>
+
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <h2 class="card-title mb-4">
+            <i class="bi bi-star text-warning me-2"></i>
+            Calificar viajeros
+          </h2>
+
+          @if (loading) {
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+            </div>
+          } @else {
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-2"></i>
+              Califica tu experiencia con los demás viajeros de este grupo.
+              @if (yaCalificados > 0) {
+                <br><strong>Ya has calificado a {{ yaCalificados }} viajero(s).</strong>
+              }
+            </div>
+
+            @if (participantesParaCalificar.length === 0) {
+              <div class="alert alert-success">
+                <i class="bi bi-check-circle me-2"></i>
+                Ya has calificado a todos los participantes de este viaje.
+              </div>
+            } @else {
+              <form (ngSubmit)="enviarCalificaciones()">
+                @for (usuario of participantesParaCalificar; track usuario.idUsuario) {
+                  <div class="card mb-3 border">
+                    <div class="card-body">
+                      <div class="d-flex align-items-center mb-3">
+                        @if (usuario.fotoPerfil) {
+                          <img [src]="getImageUrl(usuario.fotoPerfil)" [alt]="usuario.nombreCompleto"
+                               class="rounded-circle me-3" style="width: 48px; height: 48px; object-fit: cover;">
+                        } @else {
+                          <div class="avatar-placeholder rounded-circle me-3 bg-primary text-white d-flex align-items-center justify-content-center"
+                               style="width: 48px; height: 48px;">
+                            {{ usuario.iniciales }}
+                          </div>
+                        }
+                        <h5 class="mb-0">{{ usuario.nombreCompleto }}</h5>
+                      </div>
+
+                      <div class="mb-3">
+                        <label class="form-label">Calificación</label>
+                        <div class="d-flex gap-2">
+                          @for (star of [1, 2, 3, 4, 5]; track star) {
+                            <button type="button" class="btn btn-link p-0"
+                                    (click)="setCalificacion(usuario, star)">
+                              <i class="bi"
+                                 [class.bi-star-fill]="star <= usuario.calificacion"
+                                 [class.bi-star]="star > usuario.calificacion"
+                                 [class.text-warning]="star <= usuario.calificacion"
+                                 [class.text-muted]="star > usuario.calificacion"
+                                 style="font-size: 1.5rem;"></i>
+                            </button>
+                          }
+                        </div>
+                      </div>
+
+                      <div class="mb-0">
+                        <label class="form-label">Comentario (opcional)</label>
+                        <textarea class="form-control" rows="3"
+                                  [(ngModel)]="usuario.comentario"
+                                  [name]="'comentario_' + usuario.idUsuario"
+                                  placeholder="Comparte tu experiencia con este viajero..."></textarea>
+                      </div>
+                    </div>
+                  </div>
+                }
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                  <a [routerLink]="['/grupos', idGrupo]" class="btn btn-outline-secondary">
+                    Cancelar
+                  </a>
+                  <button type="submit" class="btn btn-primary" [disabled]="submitting">
+                    @if (submitting) {
+                      <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    Enviar calificaciones
+                  </button>
+                </div>
+              </form>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

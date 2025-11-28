@@ -216,22 +216,26 @@ export class GrupoDetalleComponent implements OnInit, OnDestroy {
   cerrarViaje(): void {
     if (!this.grupo) return;
 
-    if (!confirm('¿Estás seguro de que quieres cerrar este viaje? Esta acción no se puede deshacer y habilitará las calificaciones.')) {
-      return;
-    }
-
-    this.gruposService.cerrarGrupo(this.grupo.idGrupo).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.showSuccessMessage('Viaje cerrado exitosamente');
-          setTimeout(() => window.location.reload(), 1500);
-        } else {
-          this.showErrorMessage(response.error || 'Error al cerrar el viaje');
-        }
-      },
-      error: (err) => {
-        console.error('Error:', err);
-        this.showErrorMessage('Error al cerrar el viaje');
+    this.confirmService.confirm(
+      '¿Cerrar viaje?',
+      '¿Estás seguro de que quieres cerrar este viaje? Esta acción no se puede deshacer y habilitará las calificaciones.',
+      'warning'
+    ).subscribe((confirmed) => {
+      if (confirmed && this.grupo) {
+        this.gruposService.cerrarGrupo(this.grupo.idGrupo).subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.toastService.success('Viaje cerrado exitosamente');
+              setTimeout(() => window.location.reload(), 1500);
+            } else {
+              this.toastService.error(response.error || 'Error al cerrar el viaje');
+            }
+          },
+          error: (err) => {
+            console.error('Error:', err);
+            this.toastService.error('Error al cerrar el viaje');
+          }
+        });
       }
     });
   }
@@ -279,29 +283,31 @@ export class GrupoDetalleComponent implements OnInit, OnDestroy {
 
     // Validar tipo
     if (!file.type.startsWith('image/')) {
-      this.showErrorMessage('Solo se permiten archivos de imagen');
+      this.toastService.error('Solo se permiten archivos de imagen');
       input.value = '';
       return;
     }
 
     // Validar tamaño (máximo 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      this.showErrorMessage('La imagen es demasiado grande. Máximo 5MB');
+      this.toastService.error('La imagen es demasiado grande. Máximo 5MB');
       input.value = '';
       return;
     }
 
     this.chatService.enviarImagen(this.grupo.idGrupo, file).subscribe({
       next: (response) => {
-        if (response.success || response.idMensaje) {
+        if (response.idMensaje || response.success !== false) {
+          this.toastService.success('Imagen enviada exitosamente');
           input.value = '';
         } else {
-          this.showErrorMessage('No se pudo enviar la imagen');
+          this.toastService.error('No se pudo enviar la imagen');
         }
       },
       error: (err) => {
         console.error('Error:', err);
-        this.showErrorMessage('Error al enviar imagen');
+        this.toastService.error(err.error?.error || 'Error al enviar imagen');
+        input.value = '';
       }
     });
   }
@@ -317,26 +323,29 @@ export class GrupoDetalleComponent implements OnInit, OnDestroy {
   eliminarMensaje(idMensaje: number): void {
     if (!this.grupo) return;
 
-    if (!confirm('¿Estás seguro de que quieres eliminar este mensaje?')) {
-      return;
-    }
-
-    this.chatService.eliminarMensaje(this.grupo.idGrupo, idMensaje).subscribe({
-      next: (response: any) => {
-        if (response.success) {
-          // El mensaje se eliminará vía WebSocket
-          console.log('Mensaje eliminado exitosamente');
-        }
-      },
-      error: (err) => {
-        console.error('Error al eliminar mensaje:', err);
-        this.showErrorMessage('No se pudo eliminar el mensaje');
+    this.confirmService.confirm(
+      '¿Estás seguro de que quieres eliminar este mensaje?',
+      'Esta acción no se puede deshacer'
+    ).subscribe((confirmed) => {
+      if (confirmed && this.grupo) {
+        this.chatService.eliminarMensaje(this.grupo.idGrupo, idMensaje).subscribe({
+          next: (response: any) => {
+            if (response.success) {
+              // El mensaje se eliminará vía WebSocket
+              this.toastService.success('Mensaje eliminado exitosamente');
+            }
+          },
+          error: (err) => {
+            console.error('Error al eliminar mensaje:', err);
+            this.toastService.error('No se pudo eliminar el mensaje');
+          }
+        });
       }
     });
   }
 
   puedeEliminarMensaje(mensaje: any): boolean {
-    if (!this.homeData?.authenticated) return false;
+    if (!this.homeData) return false;
 
     // El usuario puede eliminar si:
     // 1. Es el creador del mensaje (comparar por email ya que no tenemos idUsuario en homeData)
@@ -348,8 +357,27 @@ export class GrupoDetalleComponent implements OnInit, OnDestroy {
     return esCreadorMensaje || esCreadorGrupo;
   }
 
+  esMensajePropio(mensaje: any): boolean {
+    if (!this.homeData) return false;
+    return mensaje.remitente?.email === this.homeData.email;
+  }
+
   getImagenDestacadaUrl(imagenDestacada: string | null | undefined): string {
     return imagenDestacada || `${environment.baseUrl}/images/default-trip.jpg`;
+  }
+
+  getImageUrl(url: string): string {
+    if (!url) return '';
+    // Si la URL ya es completa (http/https), devolverla tal cual
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    // Si ya tiene /uploads/, agregar solo la base
+    if (url.startsWith('/uploads/')) {
+      return `${environment.baseUrl}${url}`;
+    }
+    // Si es solo el nombre del archivo, agregar /uploads/
+    return `${environment.baseUrl}/uploads/${url}`;
   }
 
   formatDate(dateString: string): string {

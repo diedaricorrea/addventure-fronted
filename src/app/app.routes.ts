@@ -11,6 +11,8 @@ import { SolicitudesGrupoComponent } from './components/grupos/solicitudes-grupo
 import { NotificacionesComponent } from './components/notificaciones/notificaciones.component';
 import { MisViajesComponent } from './components/mis-viajes/mis-viajes.component';
 import { CrearGrupoComponent } from './components/grupos/crear-grupo/crear-grupo.component';
+import { CalificarViajerosComponent } from './components/calificaciones/calificar-viajeros.component';
+import { GaleriaFotosComponent } from './components/grupos/galeria-fotos.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -23,7 +25,9 @@ export const routes: Routes = [
   { path: 'grupos/crear', component: CrearGrupoComponent, canActivate: [authGuard] },
   { path: 'grupos/editar/:id', component: CrearGrupoComponent, canActivate: [authGuard] },
   { path: 'grupos/:id', component: GrupoDetalleComponent },
+  { path: 'grupos/:idGrupo/galeria-fotos', component: GaleriaFotosComponent, canActivate: [authGuard] },
   { path: 'grupos/:id/solicitudes', component: SolicitudesGrupoComponent, canActivate: [authGuard] },
+  { path: 'calificaciones/grupo/:idGrupo', component: CalificarViajerosComponent, canActivate: [authGuard] },
   // Rutas protegidas
   { path: 'mis-viajes', component: MisViajesComponent, canActivate: [authGuard] },
   { path: 'notificaciones', component: NotificacionesComponent, canActivate: [authGuard] },

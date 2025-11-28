@@ -1,0 +1,138 @@
+<app-navbar></app-navbar>
+
+<div class="container my-5">
+  @if (loading) {
+    <div class="text-center my-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+  } @else {
+    <!-- Encabezado de la galería -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <h2 class="text-primary mb-2">
+              <i class="bi bi-images"></i> Galería de Fotos
+            </h2>
+            <h5 class="text-muted">{{ grupo.nombreViaje }}</h5>
+            <small class="text-muted">
+              {{ grupo.nombre }} •
+              {{ formatearFecha(grupo.fechaInicio) }} - {{ formatearFecha(grupo.fechaFin) }}
+            </small>
+          </div>
+          <div class="text-end">
+            <span class="badge bg-primary fs-6 me-2">{{ fotos.length }} imágenes</span>
+            <a [routerLink]="['/grupos', idGrupo]" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-left"></i> Volver al grupo
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aviso de seguridad -->
+    <div class="alert alert-info d-flex align-items-center mb-4">
+      <i class="bi bi-info-circle-fill me-3"></i>
+      <div>
+        <strong>🔒 Política de Privacidad:</strong>
+        Por motivos de seguridad y privacidad, todas las imágenes compartidas en este grupo serán eliminadas automáticamente
+        <strong>1 mes después</strong> del cierre del viaje. Te recomendamos descargar tus fotos favoritas antes de esa fecha.
+      </div>
+    </div>
+
+    <!-- Galería de imágenes -->
+    @if (fotos.length === 0) {
+      <div class="alert alert-warning text-center">
+        <i class="bi bi-images me-2"></i>
+        No hay fotos compartidas en este viaje aún.
+      </div>
+    } @else {
+      <div class="row g-3">
+        @for (imagen of fotos; track imagen.idMensaje) {
+          <div class="col-md-4 col-lg-3">
+            <div class="card h-100 shadow-sm imagen-card">
+              <div class="position-relative">
+                <img
+                  [src]="getImageUrl(imagen.archivoUrl)"
+                  class="card-img-top imagen-preview"
+                  style="height: 200px; object-fit: cover; cursor: pointer;"
+                  [alt]="'Foto compartida por ' + imagen.remitente.nombre"
+                  (click)="ampliarImagen(imagen)">
+
+                <!-- Badge con nombre del autor -->
+                <div class="position-absolute top-0 start-0 m-2">
+                  <span class="badge bg-dark bg-opacity-75">
+                    <i class="bi bi-person-circle me-1"></i>
+                    {{ imagen.remitente.nombre }}
+                  </span>
+                </div>
+
+                <!-- Badge con fecha -->
+                <div class="position-absolute top-0 end-0 m-2">
+                  <span class="badge bg-dark bg-opacity-75">
+                    <i class="bi bi-calendar me-1"></i>
+                    {{ formatearFecha(imagen.fechaEnvio) }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center">
+                  <small class="text-muted">
+                    <i class="bi bi-clock me-1"></i>
+                    {{ formatearHora(imagen.fechaEnvio) }}
+                  </small>
+                  <a
+                    [href]="getImageUrl(imagen.archivoUrl)"
+                    [download]="imagen.archivoNombre"
+                    class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-download"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Modal para vista ampliada -->
+    @if (imagenAmpliada) {
+      <div class="modal fade show d-block" tabindex="-1" (click)="cerrarModal()">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+          <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h5 class="modal-title">
+                <i class="bi bi-person-circle me-2"></i>
+                {{ imagenAmpliada.remitente.nombre }} {{ imagenAmpliada.remitente.apellido }}
+              </h5>
+              <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+            </div>
+            <div class="modal-body text-center p-0">
+              <img
+                [src]="getImageUrl(imagenAmpliada.archivoUrl)"
+                class="img-fluid"
+                style="max-height: 70vh; width: auto;">
+            </div>
+            <div class="modal-footer justify-content-between">
+              <div class="text-muted">
+                <i class="bi bi-calendar me-1"></i>
+                {{ formatearFecha(imagenAmpliada.fechaEnvio) }} {{ formatearHora(imagenAmpliada.fechaEnvio) }}
+              </div>
+              <a
+                [href]="getImageUrl(imagenAmpliada.archivoUrl)"
+                [download]="imagenAmpliada.archivoNombre"
+                class="btn btn-primary">
+                <i class="bi bi-download me-2"></i>
+                Descargar
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-backdrop fade show"></div>
+    }
+  }
+</div>

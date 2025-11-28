@@ -137,3 +137,28 @@
 .location-link:hover i {
   opacity: 1;
 }
+
+/* Chat Styles */
+.message-content {
+  border-radius: 18px;
+  word-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+/* Mensajes de otros usuarios (izquierda) */
+.message-content.bg-light {
+  border-bottom-left-radius: 4px;
+}
+
+/* Mensajes propios (derecha) */
+.message-content.bg-primary {
+  border-bottom-right-radius: 4px;
+  color: white !important;
+}
+
+/* Hover effect para botón eliminar */
+.message-content .btn-link:hover {
+  text-decoration: none;
+  opacity: 0.8;
+}
