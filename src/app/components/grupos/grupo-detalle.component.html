@@ -163,17 +163,36 @@
                     <div class="col">
                       <div class="member-card text-center position-relative h-100">
                         <div class="avatar-det bg-primary text-white mx-auto mb-2">
-                          @if (grupo.creador?.fotoPerfil) {
+                          @if (grupo.creador.fotoPerfil) {
                             <img [src]="homeService.getImageUrl(grupo.creador.fotoPerfil)" alt="Perfil" />
                           } @else {
-                            <div class="avatar-content">{{ grupo.creador?.iniciales }}</div>
+                            <div class="avatar-content">{{ grupo.creador.iniciales }}</div>
                           }
                         </div>
-                        <a class="fw-medium text-black opacity-75 text-decoration-none"
-                          [routerLink]="['/perfil', grupo.creador?.idUsuario]">
-                          {{ grupo.creador?.nombreCompleto }}
+                        <a class="fw-medium text-black text-decoration-none d-block mb-1"
+                          [routerLink]="['/perfil', grupo.creador.idUsuario]"
+                          [title]="grupo.creador.nombreCompleto">
+                          {{ formatShortName(grupo.creador.nombreCompleto) }}
                         </a>
-                        <div class="organizer-label mt-2">Organizador</div>
+                        <div class="organizer-label">
+                          <i class="bi bi-star-fill me-1"></i>Organizador
+                        </div>
+                        
+                        <!-- Menú de opciones -->
+                        <div class="dropdown position-absolute top-0 end-0 m-2">
+                          <button class="btn btn-sm btn-light rounded-circle p-1" type="button" 
+                                  data-bs-toggle="dropdown" aria-expanded="false"
+                                  style="width: 28px; height: 28px; line-height: 1;">
+                            <i class="bi bi-three-dots-vertical"></i>
+                          </button>
+                          <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li>
+                              <a class="dropdown-item" [routerLink]="['/perfil', grupo.creador.idUsuario]">
+                                <i class="bi bi-person me-2"></i>Ver perfil
+                              </a>
+                            </li>
+                          </ul>
+                        </div>
                       </div>
                     </div>
 
@@ -188,7 +207,27 @@
                               <div class="avatar-content">{{ participante.iniciales }}</div>
                             }
                           </div>
-                          <div class="fw-medium">{{ participante.nombreCompleto }}</div>
+                          <a class="fw-medium text-black text-decoration-none d-block"
+                             [routerLink]="['/perfil', participante.idUsuario]"
+                             [title]="participante.nombreCompleto">
+                            {{ formatShortName(participante.nombreCompleto) }}
+                          </a>
+                          
+                          <!-- Menú de opciones -->
+                          <div class="dropdown position-absolute top-0 end-0 m-2">
+                            <button class="btn btn-sm btn-light rounded-circle p-1" type="button" 
+                                    data-bs-toggle="dropdown" aria-expanded="false"
+                                    style="width: 28px; height: 28px; line-height: 1;">
+                              <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                              <li>
+                                <a class="dropdown-item" [routerLink]="['/perfil', participante.idUsuario]">
+                                  <i class="bi bi-person me-2"></i>Ver perfil
+                                </a>
+                              </li>
+                            </ul>
+                          </div>
                         </div>
                       </div>
                     }
@@ -250,7 +289,8 @@
                   </div>
                 </div>
 
-                <!-- Etiquetas -->\n                @if (grupo.etiquetas && grupo.etiquetas.length > 0) {
+                <!-- Etiquetas -->
+                @if (grupo.etiquetas && grupo.etiquetas.length > 0) {
                   <div class="card mb-4 border-light shadow-sm">
                     <div class="card-body">
                       <h3 class="fs-5 fw-bold mb-3">Etiquetas</h3>
@@ -411,8 +451,8 @@
                             <div class="d-flex align-items-center mb-1 gap-2"
                                  [class.justify-content-end]="esMensajePropio(mensaje)">
                               <div class="d-flex align-items-center gap-2" [class.flex-row-reverse]="esMensajePropio(mensaje)">
-                                <strong class="small">
-                                  {{ mensaje.remitente?.nombre }} {{ mensaje.remitente?.apellidos }}
+                                <strong class="small" [title]="mensaje.remitente?.nombre + ' ' + mensaje.remitente?.apellidos">
+                                  {{ formatShortName((mensaje.remitente?.nombre || '') + ' ' + (mensaje.remitente?.apellidos || '')) }}
                                 </strong>
                                 <small class="text-muted">
                                   {{ formatDate(mensaje.fechaEnvio) }}

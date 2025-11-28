@@ -14,6 +14,7 @@ import { Subscription } from 'rxjs';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmService } from '../../services/confirm.service';
 import { environment } from '../../../environments/environment';
+import { NameFormatter } from '../../shared/utils/name-formatter';
 
 @Component({
   selector: 'app-grupo-detalle',
@@ -384,6 +385,13 @@ export class GrupoDetalleComponent implements OnInit, OnDestroy {
     const date = new Date(dateString);
     const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
     return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+  }
+
+  formatShortName(nombreCompleto: string | undefined): string {
+    if (!nombreCompleto) return '';
+    const parts = nombreCompleto.split(' ');
+    if (parts.length < 2) return nombreCompleto;
+    return NameFormatter.formatShortName(parts[0], parts.slice(1).join(' '));
   }
 
   private showSuccessMessage(message: string): void {

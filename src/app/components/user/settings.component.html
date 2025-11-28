@@ -147,19 +147,42 @@
               <!-- Campos del formulario -->
               <div class="row mb-3">
                 <div class="col-md-6 mb-3 mb-md-0">
-                  <label class="form-label"><i class="bi bi-person me-2"></i>Nombres</label>
-                  <input type="text" class="form-control" formControlName="nombre"
+                  <label class="form-label">
+                    <i class="bi bi-person me-2"></i>Nombres
+                    <span class="text-muted small ms-2">
+                      ({{ profileForm.get('nombre')?.value?.length || 0 }}/50)
+                    </span>
+                  </label>
+                  <input type="text" class="form-control" formControlName="nombre" maxlength="50"
+                         placeholder="Ej: María Elena"
                          [class.is-invalid]="profileForm.get('nombre')?.invalid && profileForm.get('nombre')?.touched">
                   @if (profileForm.get('nombre')?.errors?.['required']) {
                     <div class="invalid-feedback">
                       El nombre es obligatorio
                     </div>
                   }
+                  @if (profileForm.get('nombre')?.errors?.['minlength']) {
+                    <div class="invalid-feedback">
+                      El nombre debe tener al menos 2 caracteres
+                    </div>
+                  }
+                  <small class="form-text text-muted">
+                    Usa nombres cortos para mejor visualización en la app
+                  </small>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Apellidos</label>
-                  <input type="text" class="form-control" formControlName="apellidos"
+                  <label class="form-label">
+                    Apellidos
+                    <span class="text-muted small ms-2">
+                      ({{ profileForm.get('apellidos')?.value?.length || 0 }}/50)
+                    </span>
+                  </label>
+                  <input type="text" class="form-control" formControlName="apellidos" maxlength="50"
+                         placeholder="Ej: García López"
                          [class.is-invalid]="profileForm.get('apellidos')?.invalid && profileForm.get('apellidos')?.touched">
+                  <small class="form-text text-muted">
+                    Se mostrará como inicial en tarjetas: "María G."
+                  </small>
                 </div>
               </div>
 

@@ -38,8 +38,9 @@
                             <div class="col-md-6 mb-3 mb-md-0">
                                 <label for="nombre" class="form-label">
                                     <i class="fa-regular fa-user me-2"></i>Nombre
+                                    <span class="text-muted small ms-1">({{ registerForm.get('nombre')?.value?.length || 0 }}/50)</span>
                                 </label>
-                                <input type="text" class="form-control" id="nombre" placeholder="Tu nombre"
+                                <input type="text" class="form-control" id="nombre" placeholder="Ej: María Elena" maxlength="50"
                                     formControlName="nombre"
                                     [class.is-invalid]="registerForm.get('nombre')?.invalid && registerForm.get('nombre')?.touched">
                                 @if (registerForm.get('nombre')?.invalid && registerForm.get('nombre')?.touched) {
@@ -47,13 +48,19 @@
                                 }
                             </div>
                             <div class="col-md-6">
-                                <label for="apellido" class="form-label">Apellido</label>
-                                <input type="text" class="form-control" id="apellido" placeholder="Tu apellido"
+                                <label for="apellido" class="form-label">
+                                    Apellido
+                                    <span class="text-muted small ms-1">({{ registerForm.get('apellido')?.value?.length || 0 }}/50)</span>
+                                </label>
+                                <input type="text" class="form-control" id="apellido" placeholder="Ej: García" maxlength="50"
                                     formControlName="apellido"
                                     [class.is-invalid]="registerForm.get('apellido')?.invalid && registerForm.get('apellido')?.touched">
                                 @if (registerForm.get('apellido')?.invalid && registerForm.get('apellido')?.touched) {
                                     <div class="invalid-feedback">El apellido es obligatorio (mín. 2 caracteres)</div>
                                 }
+                                <small class="form-text text-muted d-block mt-1">
+                                    Se mostrará como "María G." en la app
+                                </small>
                             </div>
                         </div>
 

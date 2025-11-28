@@ -4,6 +4,7 @@ import { RouterModule, Router } from '@angular/router';
 import { HomeData } from '../../../models/home-data.model';
 import { AuthService } from '../../../services/auth.service';
 import { HomeService } from '../../../services/home.service';
+import { NameFormatter } from '../../utils/name-formatter';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -38,6 +39,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   get isAuthenticated(): boolean {
     return this.homeData?.authenticated || false;
+  }
+
+  // Formatear nombre corto para navbar
+  getShortName(): string {
+    if (!this.homeData?.nombre || !this.homeData?.apellido) {
+      return this.homeData?.username || '';
+    }
+    return NameFormatter.formatCardName(this.homeData.nombre, this.homeData.apellido);
   }
 
   logout(): void {

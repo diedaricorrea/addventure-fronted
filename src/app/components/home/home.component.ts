@@ -8,6 +8,7 @@ import { GrupoViaje } from '../../models/grupos.model';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { environment } from '../../../environments/environment';
+import { NameFormatter } from '../../shared/utils/name-formatter';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -145,6 +146,16 @@ export class HomeComponent implements OnInit, OnDestroy {
     const date = new Date(dateString);
     const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
     return `${date.getDate()} ${months[date.getMonth()]}`;
+  }
+
+  // Formatear nombre para tarjetas (Nombre A.)
+  formatShortName(nombreCompleto: string): string {
+    const partes = nombreCompleto.trim().split(' ');
+    if (partes.length < 2) return nombreCompleto;
+    
+    const nombre = partes[0];
+    const inicialApellido = partes[partes.length - 1].charAt(0).toUpperCase();
+    return `${nombre} ${inicialApellido}.`;
   }
 
   // Determinar color del tag según tipo
