@@ -10,6 +10,7 @@ import { GrupoDetalleComponent } from './components/grupos/grupo-detalle.compone
 import { SolicitudesGrupoComponent } from './components/grupos/solicitudes-grupo.component';
 import { NotificacionesComponent } from './components/notificaciones/notificaciones.component';
 import { MisViajesComponent } from './components/mis-viajes/mis-viajes.component';
+import { CrearGrupoComponent } from './components/grupos/crear-grupo/crear-grupo.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -19,6 +20,8 @@ export const routes: Routes = [
   { path: 'registro', component: RegisterComponent },
   { path: 'ayuda', component: SupportComponent },
   { path: 'grupos', component: GruposComponent },
+  { path: 'grupos/crear', component: CrearGrupoComponent, canActivate: [authGuard] },
+  { path: 'grupos/editar/:id', component: CrearGrupoComponent, canActivate: [authGuard] },
   { path: 'grupos/:id', component: GrupoDetalleComponent },
   { path: 'grupos/:id/solicitudes', component: SolicitudesGrupoComponent, canActivate: [authGuard] },
   // Rutas protegidas

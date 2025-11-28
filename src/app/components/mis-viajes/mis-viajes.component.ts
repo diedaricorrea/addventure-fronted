@@ -53,18 +53,16 @@ export class MisViajesComponent implements OnInit {
     });
   }
 
-  verDetalle(idGrupo: number): void {
-    this.router.navigate(['/grupo-detalle', idGrupo]);
+  verDetalles(idGrupo: number): void {
+    this.router.navigate(['/grupos', idGrupo]);
   }
 
   irACalificaciones(idGrupo: number): void {
-    // TODO: Implementar cuando exista componente de calificaciones
-    this.toastService.info('Funcionalidad de calificaciones en desarrollo');
+    this.toastService.info('Funcionalidad de calificaciones próximamente');
   }
 
   irAEditar(idGrupo: number): void {
-    // TODO: Implementar cuando exista componente de editar grupo
-    this.toastService.info('Funcionalidad de edición en desarrollo');
+    this.router.navigate(['/grupos/editar', idGrupo]);
   }
 
   confirmarAbandonar(grupo: GrupoViaje): void {
@@ -83,12 +81,11 @@ export class MisViajesComponent implements OnInit {
 
   abandonarGrupo(idGrupo: number): void {
     this.misViajesService.abandonarGrupo(idGrupo).subscribe({
-      next: () => {
-        this.toastService.success('Has abandonado el grupo exitosamente');
+      next: (response: any) => {
+        this.toastService.success(response.mensaje || 'Has abandonado el grupo exitosamente');
         this.cargarMisViajes();
       },
       error: (error) => {
-        console.error('Error al abandonar grupo:', error);
         this.toastService.error(error.error?.error || 'Error al abandonar el grupo');
       }
     });
@@ -110,12 +107,11 @@ export class MisViajesComponent implements OnInit {
 
   eliminarGrupo(idGrupo: number): void {
     this.misViajesService.eliminarGrupo(idGrupo).subscribe({
-      next: () => {
-        this.toastService.success('Grupo eliminado exitosamente');
+      next: (response: any) => {
+        this.toastService.success(response.mensaje || 'Grupo eliminado exitosamente');
         this.cargarMisViajes();
       },
       error: (error) => {
-        console.error('Error al eliminar grupo:', error);
         this.toastService.error(error.error?.error || 'Error al eliminar el grupo');
       }
     });
@@ -184,7 +180,6 @@ export class MisViajesComponent implements OnInit {
   }
 
   irACrearGrupo(): void {
-    // TODO: Implementar cuando exista componente de crear grupo
-    this.toastService.info('Funcionalidad de crear grupo en desarrollo');
+    this.router.navigate(['/grupos/crear']);
   }
 }

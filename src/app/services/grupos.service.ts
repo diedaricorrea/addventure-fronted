@@ -4,6 +4,26 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { GruposResponse, GruposFiltros, GrupoDetalleResponse } from '../models/grupos.model';
 
+export interface CrearGrupoDTO {
+  nombreViaje: string;
+  destinoPrincipal: string;
+  fechaInicio: string;
+  fechaFin: string;
+  descripcion: string;
+  puntoEncuentro: string;
+  imagenDestacada?: string;
+  rangoEdadMin: number;
+  rangoEdadMax: number;
+  maxParticipantes: number;
+  etiquetas: string[];
+  diasItinerario?: DiaItinerario[];
+}
+
+export interface DiaItinerario {
+  diaNumero: number;
+  actividades: string[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -60,5 +80,13 @@ export class GruposService {
 
   eliminarGrupo(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
+  }
+
+  crearGrupo(datos: CrearGrupoDTO): Observable<any> {
+    return this.http.post(this.apiUrl, datos);
+  }
+
+  actualizarGrupo(id: number, datos: CrearGrupoDTO): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, datos);
   }
 }
