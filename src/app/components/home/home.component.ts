@@ -4,8 +4,10 @@ import { RouterModule } from '@angular/router';
 import { HomeService } from '../../services/home.service';
 import { AuthService } from '../../services/auth.service';
 import { HomeData } from '../../models/home-data.model';
+import { GrupoViaje } from '../../models/grupos.model';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
+import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -27,63 +29,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   // Para escuchar cambios en la autenticación
   private authSubscription?: Subscription;
 
-  // Datos de destinos (esto es estático para mostrar en la UI)
-  destinations = [
-    {
-      id: 1,
-      name: "Cusco",
-      country: "Perú",
-      image: "images/machu-picchu.jpg",
-      dates: "Julio - Agosto",
-      tag: "AVENTURA",
-      tagColor: "bg-success text-white",
-    },
-    {
-      id: 2,
-      name: "Buenos Aires",
-      country: "Argentina",
-      image: "images/buenos-aires.jpg",
-      dates: "Septiembre - Octubre",
-      tag: "CULTURAL",
-      tagColor: "bg-warning text-dark",
-    },
-    {
-      id: 3,
-      name: "Cancún",
-      country: "México",
-      image: "images/Cancun.webp",
-      dates: "Febrero - Abril",
-      tag: "PLAYA",
-      tagColor: "bg-info text-white",
-    },
-    {
-      id: 4,
-      name: "Cartagena",
-      country: "Colombia",
-      image: "images/cartagena.jpeg",
-      dates: "Noviembre - Diciembre",
-      tag: "GASTRONÓMICO",
-      tagColor: "bg-danger text-white",
-    },
-    {
-      id: 5,
-      name: "Santiago",
-      country: "Chile",
-      image: "images/santiago.jpg",
-      dates: "Octubre - Noviembre",
-      tag: "URBANO",
-      tagColor: "bg-primary text-white",
-    },
-    {
-      id: 6,
-      name: "Galápagos",
-      country: "Ecuador",
-      image: "images/galapagos.jpeg",
-      dates: "Mayo - Junio",
-      tag: "NATURALEZA",
-      tagColor: "bg-success text-white",
-    },
-  ];
+  // Grupos destacados desde el backend
+  gruposDestacados: GrupoViaje[] = [];
 
   // Variables del carrusel
   currentSlide = 0;
@@ -98,6 +45,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Cargar datos del home al entrar
     this.loadHomeData();
+    this.loadGruposDestacados();
 
     // Nos suscribimos a cambios del usuario autenticado
     this.authSubscription = this.authService.currentUser$.subscribe(user => {
@@ -137,6 +85,18 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Cargar grupos destacados desde el backend
+  loadGruposDestacados(): void {
+    this.homeService.getGruposDestacados().subscribe({
+      next: (grupos) => {
+        this.gruposDestacados = grupos;
+      },
+      error: (err) => {
+        console.error('Error al cargar grupos destacados:', err);
+      }
+    });
+  }
+
   // Configuración del carrusel: cambia automáticamente cada 5s
   initCarousel(): void {
     this.carouselInterval = setInterval(() => {
@@ -169,7 +129,37 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   // Número total de slides calculado según items y vista
   get totalSlides(): number {
-    return Math.ceil(this.destinations.length / this.slidesPerView);
+    return Math.ceil(this.gruposDestacados.length / this.slidesPerView);
+  }
+
+  // Obtener URL de imagen
+  getImageUrl(imagen: string | null | undefined): string {
+    if (!imagen) return `${environment.baseUrl}/images/default-trip.jpg`;
+    if (imagen.startsWith('http://') || imagen.startsWith('https://')) return imagen;
+    return `${environment.baseUrl}${imagen}`;
+  }
+
+  // Formatear fecha
+  formatDate(dateString: string | undefined): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    return `${date.getDate()} ${months[date.getMonth()]}`;
+  }
+
+  // Determinar color del tag según tipo
+  getTagColor(tag: string): string {
+    const tagColors: { [key: string]: string } = {
+      'AVENTURA': 'bg-success text-white',
+      'CULTURAL': 'bg-warning text-dark',
+      'PLAYA': 'bg-info text-white',
+      'NATURALEZA': 'bg-success text-white',
+      'MONTAÑA': 'bg-secondary text-white',
+      'TURISMO': 'bg-primary text-white',
+      'GASTRONÓMICO': 'bg-danger text-white',
+      'URBANO': 'bg-dark text-white'
+    };
+    return tagColors[tag] || 'bg-primary text-white';
   }
 
   // Navegar al slide anterior

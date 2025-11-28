@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { HomeData } from '../models/home-data.model';
+import { GrupoViaje } from '../models/grupos.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({ // Puedo usarlo en cualquier parte de la aplicacion
@@ -9,6 +10,7 @@ import { environment } from '../../environments/environment';
 })
 export class HomeService {
   private apiUrl = `${environment.apiUrl}/home`;
+  private gruposUrl = `${environment.apiUrl}/grupos`;
 
   // Subject para compartir datos entre componentes
   private homeDataSubject = new BehaviorSubject<HomeData | null>(null);
@@ -38,4 +40,10 @@ export class HomeService {
     }
     return `${environment.baseUrl}/uploads/${fotoPerfil}`;
   }
+
+  // Obtener grupos destacados/en tendencia
+  getGruposDestacados(): Observable<GrupoViaje[]> {
+    return this.http.get<GrupoViaje[]>(`${this.gruposUrl}/destinos-tendencia`);
+  }
 }
+
