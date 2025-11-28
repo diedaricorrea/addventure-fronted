@@ -3,8 +3,10 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HomeService } from '../../services/home.service';
 import { AuthService } from '../../services/auth.service';
+import { TestimonioService } from '../../services/testimonio.service';
 import { HomeData } from '../../models/home-data.model';
 import { GrupoViaje } from '../../models/grupos.model';
+import { Testimonio } from '../../models/testimonio.model';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { environment } from '../../../environments/environment';
@@ -33,6 +35,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   // Grupos destacados desde el backend
   gruposDestacados: GrupoViaje[] = [];
 
+  // Testimonios destacados desde el backend
+  testimoniosDestacados: Testimonio[] = [];
+  loadingTestimonios = true;
+
   // Variables del carrusel
   currentSlide = 0;
   slidesPerView = 4;
@@ -40,13 +46,15 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   constructor(
     private homeService: HomeService, // Servicio que llama al backend
-    private authService: AuthService  // Servicio para detectar autenticación
+    private authService: AuthService,  // Servicio para detectar autenticación
+    private testimonioService: TestimonioService // Servicio para testimonios
   ) { }
 
   ngOnInit(): void {
     // Cargar datos del home al entrar
     this.loadHomeData();
     this.loadGruposDestacados();
+    this.loadTestimoniosDestacados();
 
     // Nos suscribimos a cambios del usuario autenticado
     this.authSubscription = this.authService.currentUser$.subscribe(user => {
@@ -94,6 +102,20 @@ export class HomeComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Error al cargar grupos destacados:', err);
+      }
+    });
+  }
+
+  // Cargar testimonios destacados desde el backend
+  loadTestimoniosDestacados(): void {
+    this.testimonioService.getTestimoniosDestacados(6).subscribe({
+      next: (testimonios) => {
+        this.testimoniosDestacados = testimonios;
+        this.loadingTestimonios = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar testimonios destacados:', err);
+        this.loadingTestimonios = false;
       }
     });
   }
@@ -192,5 +214,51 @@ export class HomeComponent implements OnInit, OnDestroy {
   getCarouselTransform(): string {
     const slideWidth = 100 / this.slidesPerView;
     return `translateX(-${this.currentSlide * slideWidth * this.slidesPerView}%)`;
+  }
+
+  // Obtener nombre del testimonio (anónimo o real)
+  getTestimonioNombre(testimonio: Testimonio): string {
+    if (testimonio.anonimo) {
+      return 'Viajero Anónimo';
+    }
+    return NameFormatter.formatShortName(testimonio.nombreAutor, testimonio.apellidoAutor);
+  }
+
+  // Obtener ubicación del testimonio
+  getTestimonioUbicacion(testimonio: Testimonio): string {
+    if (testimonio.anonimo) {
+      return 'Latinoamérica';
+    }
+    const ciudad = testimonio.ciudadAutor || 'Ciudad';
+    const pais = testimonio.paisAutor || 'País';
+    return `${ciudad}, ${pais}`;
+  }
+
+  // Obtener iniciales para avatar
+  getTestimonioIniciales(testimonio: Testimonio): string {
+    if (testimonio.anonimo) {
+      return '?';
+    }
+    return NameFormatter.getInitials(testimonio.nombreAutor, testimonio.apellidoAutor);
+  }
+
+  // Generar array de estrellas para calificación
+  getEstrellas(calificacion: number): boolean[] {
+    return Array(5).fill(false).map((_, i) => i < calificacion);
+  }
+
+  // Obtener color del testimonio según índice
+  getTestimonioColor(index: number): string {
+    const colores = ['blue', 'green', 'purple', 'orange', 'pink', 'indigo'];
+    return colores[index % colores.length];
+  }
+
+  // Obtener URL completa de la foto de perfil del testimonio
+  getTestimonioFotoUrl(fotoPerfil: string | null | undefined): string {
+    if (!fotoPerfil) return '';
+    if (fotoPerfil.startsWith('http://') || fotoPerfil.startsWith('https://')) {
+      return fotoPerfil;
+    }
+    return `${environment.baseUrl}/uploads/${fotoPerfil}`;
   }
 }

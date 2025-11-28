@@ -241,90 +241,61 @@
             </p>
         </div>
 
-        <div class="row g-4">
-            <div class="col-md-4 fade-in" data-delay="200">
-                <div class="testimonial-card bg-blue-50 border border-blue-100 h-100">
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="testimonial-avatar me-3">
-                            <img src="https://randomuser.me/api/portraits/women/12.jpg" alt="Mariana López"
-                                class="img-fluid">
-                        </div>
-                        <div>
-                            <h5 class="mb-0 text-primary">Mariana López</h5>
-                            <p class="small text-muted mb-0">Desde Lima, Perú</p>
-                        </div>
-                    </div>
-                    <div class="bg-white p-3 rounded mb-3 border">
-                        <p class="fst-italic text-muted">
-                            "Gracias a AddVenture encontré mi grupo ideal para recorrer Colombia. Todo fue fácil,
-                            seguro y muy divertido. ¡Hice amigos para toda la vida!"
-                        </p>
-                    </div>
-                    <div class="text-center text-warning">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
-                </div>
+        <!-- Loading state -->
+        <div *ngIf="loadingTestimonios" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando testimonios...</span>
             </div>
+        </div>
 
-            <div class="col-md-4 fade-in" data-delay="400">
-                <div class="testimonial-card bg-green-50 border border-green-100 h-100">
+        <!-- Testimonios dinámicos -->
+        <div *ngIf="!loadingTestimonios && testimoniosDestacados.length > 0" class="row g-4">
+            <div *ngFor="let testimonio of testimoniosDestacados; let i = index"
+                 class="col-md-4 fade-in"
+                 [attr.data-delay]="(i + 1) * 200">
+                <div class="testimonial-card h-100"
+                     [ngClass]="'bg-' + getTestimonioColor(i) + '-50 border border-' + getTestimonioColor(i) + '-100'">
                     <div class="d-flex align-items-center mb-4">
                         <div class="testimonial-avatar me-3">
-                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Carlos Méndez"
-                                class="img-fluid">
+                            <!-- Foto de perfil si existe y no es anónimo -->
+                            <img *ngIf="!testimonio.anonimo && testimonio.fotoPerfilAutor"
+                                 [src]="getTestimonioFotoUrl(testimonio.fotoPerfilAutor)"
+                                 [alt]="getTestimonioNombre(testimonio)"
+                                 class="img-fluid">
+                            <!-- Iniciales si no hay foto -->
+                            <div *ngIf="testimonio.anonimo || !testimonio.fotoPerfilAutor"
+                                 class="avatar-circle text-white"
+                                 [ngClass]="'bg-' + getTestimonioColor(i) + '-500'">
+                                {{ getTestimonioIniciales(testimonio) }}
+                            </div>
                         </div>
                         <div>
-                            <h5 class="mb-0 text-success">Carlos Méndez</h5>
-                            <p class="small text-muted mb-0">Desde Ciudad de México, México</p>
+                            <h5 class="mb-0" [ngClass]="'text-' + getTestimonioColor(i)">
+                                {{ getTestimonioNombre(testimonio) }}
+                            </h5>
+                            <p class="small text-muted mb-0">Desde {{ getTestimonioUbicacion(testimonio) }}</p>
                         </div>
                     </div>
                     <div class="bg-white p-3 rounded mb-3 border">
-                        <p class="fst-italic text-muted">
-                            "Me uní a un grupo para explorar la Patagonia y fue una de las mejores decisiones. Todo
-                            el viaje fue colaborativo y sin complicaciones."
+                        <p class="fst-italic text-muted mb-0">
+                            "{{ testimonio.comentario }}"
                         </p>
                     </div>
                     <div class="text-center text-warning">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
+                        <i *ngFor="let filled of getEstrellas(testimonio.calificacion)"
+                           [class]="filled ? 'fas fa-star' : 'far fa-star'"></i>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="col-md-4 fade-in" data-delay="600">
-                <div class="testimonial-card bg-purple-50 border border-purple-100 h-100">
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="testimonial-avatar me-3">
-                            <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Juliana Pereira"
-                                class="img-fluid">
-                        </div>
-                        <div>
-                            <h5 class="mb-0 text-purple">Juliana Pereira</h5>
-                            <p class="small text-muted mb-0">Desde Medellín, Colombia</p>
-                        </div>
-                    </div>
-                    <div class="bg-white p-3 rounded mb-3 border">
-                        <p class="fst-italic text-muted">
-                            "Lo que más me gustó fue lo personalizable que se siente la experiencia. Me encanta cómo
-                            puedo filtrar viajes según mi estilo."
-                        </p>
-                    </div>
-                    <div class="text-center text-warning">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
-                </div>
-            </div>
+        <!-- Sin testimonios -->
+        <div *ngIf="!loadingTestimonios && testimoniosDestacados.length === 0" class="text-center py-5">
+            <i class="bi bi-chat-quote fs-1 text-muted"></i>
+            <p class="text-muted mt-3">
+                Aún no hay testimonios destacados.<br>
+                ¡Sé el primero en compartir tu experiencia!
+            </p>
         </div>
     </div>
 </section>

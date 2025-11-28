@@ -13,6 +13,7 @@ import { GrupoViaje, Itinerario } from '../../models/grupos.model';
 import { Subscription } from 'rxjs';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmService } from '../../services/confirm.service';
+import { TestimonioService } from '../../services/testimonio.service';
 import { environment } from '../../../environments/environment';
 import { NameFormatter } from '../../shared/utils/name-formatter';
 
@@ -34,6 +35,14 @@ export class GrupoDetalleComponent implements OnInit, OnDestroy {
   deleteConfirmText = '';
   mensajes: any[] = [];
   private wsSubscription?: Subscription;
+
+  // Testimonio modal
+  testimonioCalificacion = 0;
+  testimonioComentario = '';
+  testimonioAnonimo = false;
+  testimonioEnviado = false;
+  testimonioError: string | null = null;
+  enviandoTestimonio = false;
 
   // Permisos del usuario
   permisos: any = {
@@ -60,7 +69,8 @@ export class GrupoDetalleComponent implements OnInit, OnDestroy {
     private wsService: WebSocketService,
     private solicitudService: SolicitudService,
     private toastService: ToastService,
-    private confirmService: ConfirmService
+    private confirmService: ConfirmService,
+    private testimonioService: TestimonioService
   ) {}
 
   // Método para encode URI
@@ -227,7 +237,10 @@ export class GrupoDetalleComponent implements OnInit, OnDestroy {
           next: (response) => {
             if (response.success) {
               this.toastService.success('Viaje cerrado exitosamente');
-              setTimeout(() => window.location.reload(), 1500);
+              // Mostrar modal de testimonio después de 1 segundo
+              setTimeout(() => {
+                this.mostrarModalTestimonio();
+              }, 1000);
             } else {
               this.toastService.error(response.error || 'Error al cerrar el viaje');
             }
@@ -400,5 +413,84 @@ export class GrupoDetalleComponent implements OnInit, OnDestroy {
 
   private showErrorMessage(message: string): void {
     this.toastService.error(message);
+  }
+
+  // Métodos del modal de testimonio
+  mostrarModalTestimonio(): void {
+    // Resetear valores
+    this.testimonioCalificacion = 0;
+    this.testimonioComentario = '';
+    this.testimonioAnonimo = false;
+    this.testimonioEnviado = false;
+    this.testimonioError = null;
+    this.enviandoTestimonio = false;
+
+    // Mostrar modal con Bootstrap
+    const modalElement = document.getElementById('testimonioModal');
+    if (modalElement) {
+      const bootstrap = (window as any).bootstrap;
+      if (bootstrap && bootstrap.Modal) {
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+      }
+    }
+  }
+
+  setCalificacionTestimonio(calificacion: number): void {
+    this.testimonioCalificacion = calificacion;
+  }
+
+  puedeEnviarTestimonio(): boolean {
+    return this.testimonioCalificacion > 0 &&
+           this.testimonioComentario.length >= 20 &&
+           this.testimonioComentario.length <= 500;
+  }
+
+  enviarTestimonio(): void {
+    if (!this.puedeEnviarTestimonio()) {
+      this.testimonioError = 'Por favor completa todos los campos correctamente';
+      return;
+    }
+
+    this.enviandoTestimonio = true;
+    this.testimonioError = null;
+
+    const request = {
+      comentario: this.testimonioComentario,
+      calificacion: this.testimonioCalificacion,
+      anonimo: this.testimonioAnonimo,
+      idGrupo: this.grupo?.idGrupo
+    };
+
+    this.testimonioService.crearTestimonio(request).subscribe({
+      next: (response) => {
+        this.testimonioEnviado = true;
+        this.enviandoTestimonio = false;
+
+        // Recargar página después de 3 segundos
+        setTimeout(() => {
+          this.cerrarModalTestimonio();
+          window.location.reload();
+        }, 3000);
+      },
+      error: (err) => {
+        console.error('Error al enviar testimonio:', err);
+        this.testimonioError = err.error?.error || 'Error al enviar el testimonio. Intenta nuevamente.';
+        this.enviandoTestimonio = false;
+      }
+    });
+  }
+
+  cerrarModalTestimonio(): void {
+    const modalElement = document.getElementById('testimonioModal');
+    if (modalElement) {
+      const bootstrap = (window as any).bootstrap;
+      if (bootstrap && bootstrap.Modal) {
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+          modal.hide();
+        }
+      }
+    }
   }
 }
