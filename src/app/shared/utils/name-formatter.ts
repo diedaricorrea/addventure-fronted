@@ -11,11 +11,11 @@ export class NameFormatter {
    */
   static formatShortName(nombre: string | undefined, apellido: string | undefined): string {
     if (!nombre) return '';
-    
+
     const primerNombre = nombre.trim().split(' ')[0];
-    
+
     if (!apellido) return primerNombre;
-    
+
     const inicialApellido = apellido.trim().charAt(0).toUpperCase();
     return `${primerNombre} ${inicialApellido}.`;
   }
@@ -28,11 +28,11 @@ export class NameFormatter {
    */
   static truncateName(nombreCompleto: string | undefined, maxLength: number = 30): string {
     if (!nombreCompleto) return '';
-    
+
     if (nombreCompleto.length <= maxLength) {
       return nombreCompleto;
     }
-    
+
     return nombreCompleto.substring(0, maxLength) + '...';
   }
 
@@ -44,10 +44,10 @@ export class NameFormatter {
    */
   static getInitials(nombre: string | undefined, apellido: string | undefined): string {
     if (!nombre) return '??';
-    
+
     const inicialNombre = nombre.trim().charAt(0).toUpperCase();
     const inicialApellido = apellido ? apellido.trim().charAt(0).toUpperCase() : '';
-    
+
     return inicialNombre + inicialApellido;
   }
 
@@ -57,16 +57,16 @@ export class NameFormatter {
    */
   static formatCardName(nombre: string | undefined, apellido: string | undefined): string {
     if (!nombre) return '';
-    
+
     const primerNombre = nombre.trim().split(' ')[0];
-    
+
     // Si el nombre es muy largo, truncar
     if (primerNombre.length > 15) {
       return primerNombre.substring(0, 15) + '...';
     }
-    
+
     if (!apellido) return primerNombre;
-    
+
     const inicialApellido = apellido.trim().charAt(0).toUpperCase();
     return `${primerNombre} ${inicialApellido}.`;
   }

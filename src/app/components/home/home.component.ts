@@ -152,7 +152,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   formatShortName(nombreCompleto: string): string {
     const partes = nombreCompleto.trim().split(' ');
     if (partes.length < 2) return nombreCompleto;
-    
+
     const nombre = partes[0];
     const inicialApellido = partes[partes.length - 1].charAt(0).toUpperCase();
     return `${nombre} ${inicialApellido}.`;
