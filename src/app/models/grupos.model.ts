@@ -16,6 +16,7 @@ export interface ViajeInfo {
   fechaInicio: string;
   fechaFin: string;
   descripcion: string;
+  puntoEncuentro?: string;
   rangoEdadMin: number;
   rangoEdadMax: number;
   esVerificado: boolean;

@@ -62,6 +62,11 @@ export class GrupoDetalleComponent implements OnInit, OnDestroy {
     private confirmService: ConfirmService
   ) {}
 
+  // Método para encode URI
+  encodeURIComponent(str: string): string {
+    return encodeURIComponent(str);
+  }
+
   ngOnInit(): void {
     this.loadHomeData();
     const id = this.route.snapshot.paramMap.get('id');

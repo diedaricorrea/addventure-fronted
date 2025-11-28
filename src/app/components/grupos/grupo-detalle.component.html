@@ -226,6 +226,27 @@
                         </div>
                       </div>
                     </div>
+
+                    @if (grupo.viaje?.puntoEncuentro) {
+                      <div class="mb-3">
+                        <div class="d-flex align-items-start mb-2">
+                          <i class="bi bi-geo-alt-fill text-primary fs-5 me-3"></i>
+                          <div class="w-100">
+                            <p class="text-muted small mb-1">Punto de encuentro</p>
+                            <a
+                              [href]="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(grupo.viaje?.puntoEncuentro || '')"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              class="text-decoration-none text-dark d-inline-flex align-items-center gap-2 location-link"
+                              title="Ver en Google Maps"
+                            >
+                              <span class="fw-medium small">{{ grupo.viaje?.puntoEncuentro }}</span>
+                              <i class="bi bi-box-arrow-up-right text-primary small"></i>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    }
                   </div>
                 </div>
 

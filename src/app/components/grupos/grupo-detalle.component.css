@@ -109,3 +109,31 @@
   align-items: center;
   justify-content: center;
 }
+
+/* Location Link Styles */
+.location-link {
+  transition: all 0.2s ease;
+  padding: 4px 8px;
+  border-radius: 6px;
+  margin: -4px -8px;
+}
+
+.location-link:hover {
+  background-color: #f0f7ff;
+  transform: translateX(2px);
+}
+
+.location-link:hover span {
+  color: #0d6efd !important;
+  text-decoration: underline;
+}
+
+.location-link i {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  font-size: 0.85rem;
+}
+
+.location-link:hover i {
+  opacity: 1;
+}
