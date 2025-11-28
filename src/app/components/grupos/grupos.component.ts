@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { HomeService } from '../../services/home.service';
@@ -36,7 +36,9 @@ export class GruposComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private homeService: HomeService,
-    private gruposService: GruposService
+    private gruposService: GruposService,
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     const today = new Date();
     this.minDate = today.toISOString().split('T')[0];
@@ -45,6 +47,7 @@ export class GruposComponent implements OnInit {
   ngOnInit(): void {
     this.loadHomeData();
     this.createForm();
+    this.loadFiltersFromUrl();
     this.buscarGrupos();
   }
 
@@ -65,8 +68,29 @@ export class GruposComponent implements OnInit {
     });
   }
 
+  loadFiltersFromUrl(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['destinoPrincipal']) {
+        this.searchForm.patchValue({ destinoPrincipal: params['destinoPrincipal'] });
+      }
+      if (params['fechaInicio']) {
+        this.searchForm.patchValue({ fechaInicio: params['fechaInicio'] });
+      }
+      if (params['fechaFin']) {
+        this.searchForm.patchValue({ fechaFin: params['fechaFin'] });
+      }
+      if (params['sort']) {
+        this.searchForm.patchValue({ sort: params['sort'] });
+      }
+      if (params['page']) {
+        this.currentPage = parseInt(params['page'], 10);
+      }
+    });
+  }
+
   onSubmit(): void {
     this.currentPage = 0; // Reiniciar a la primera página al buscar
+    this.updateUrlWithFilters();
     this.buscarGrupos();
   }
 
@@ -108,14 +132,32 @@ export class GruposComponent implements OnInit {
     });
   }
 
+  updateUrlWithFilters(): void {
+    const queryParams: any = { page: this.currentPage };
+
+    const formValue = this.searchForm.value;
+    if (formValue.destinoPrincipal) queryParams['destinoPrincipal'] = formValue.destinoPrincipal;
+    if (formValue.fechaInicio) queryParams['fechaInicio'] = formValue.fechaInicio;
+    if (formValue.fechaFin) queryParams['fechaFin'] = formValue.fechaFin;
+    if (formValue.sort) queryParams['sort'] = formValue.sort;
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      queryParamsHandling: 'merge'
+    });
+  }
+
   onSortChange(): void {
     this.currentPage = 0;
+    this.updateUrlWithFilters();
     this.buscarGrupos();
   }
 
   goToPage(page: number): void {
     if (page >= 0 && page < this.totalPages) {
       this.currentPage = page;
+      this.updateUrlWithFilters();
       this.buscarGrupos();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
