@@ -94,6 +94,26 @@ export class GruposComponent implements OnInit {
     this.buscarGrupos();
   }
 
+  limpiarFiltros(): void {
+    this.searchForm.reset({
+      destinoPrincipal: '',
+      fechaInicio: '',
+      fechaFin: '',
+      sort: ''
+    });
+    this.currentPage = 0;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {}
+    });
+    this.buscarGrupos();
+  }
+
+  get hayFiltrosActivos(): boolean {
+    const formValue = this.searchForm.value;
+    return !!(formValue.destinoPrincipal || formValue.fechaInicio || formValue.fechaFin || formValue.sort);
+  }
+
   buscarGrupos(): void {
     this.loading = true;
     this.error = null;

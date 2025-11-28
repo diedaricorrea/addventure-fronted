@@ -42,31 +42,74 @@
             <form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
               <div class="row g-3 mb-4">
                 <div class="col-md-3">
-                  <label for="destino" class="form-label">¿A dónde quieres ir?</label>
-                  <input type="text" class="form-control form-control-lg" id="destino" formControlName="destinoPrincipal"
-                    placeholder="Ej: Piura">
+                  <label for="destino" class="form-label fw-semibold">
+                    <i class="bi bi-geo-alt-fill text-primary me-1"></i>Destino del viaje
+                  </label>
+                  <input type="text" class="form-control" id="destino" formControlName="destinoPrincipal"
+                    placeholder="Ej: Piura, Cusco, Lima">
+                  <small class="form-text text-muted">Ciudad o región de destino</small>
                 </div>
                 <div class="col-md-3">
-                  <label for="fechaInicio" class="form-label">Fecha de inicio</label>
-                  <input type="date" class="form-control form-control-lg" id="fechaInicio" formControlName="fechaInicio"
+                  <label for="fechaInicio" class="form-label fw-semibold">
+                    <i class="bi bi-calendar-check text-success me-1"></i>Desde
+                  </label>
+                  <input type="date" class="form-control" id="fechaInicio" formControlName="fechaInicio"
                     [min]="minDate">
+                  <small class="form-text text-muted">Fecha de inicio del viaje</small>
                 </div>
                 <div class="col-md-3">
-                  <label for="fechaFin" class="form-label">Fecha de fin</label>
-                  <input type="date" class="form-control form-control-lg" id="fechaFin" formControlName="fechaFin"
+                  <label for="fechaFin" class="form-label fw-semibold">
+                    <i class="bi bi-calendar-x text-danger me-1"></i>Hasta
+                  </label>
+                  <input type="date" class="form-control" id="fechaFin" formControlName="fechaFin"
                     [min]="minDate">
+                  <small class="form-text text-muted">Fecha de fin del viaje</small>
                 </div>
                 <div class="col-md-3">
-                  <label for="ordenar" class="form-label">Ordenar</label>
-                  <select formControlName="sort" id="ordenar" class="form-select form-select-lg"
+                  <label for="ordenar" class="form-label fw-semibold">
+                    <i class="bi bi-sort-down text-info me-1"></i>Ordenar por
+                  </label>
+                  <select formControlName="sort" id="ordenar" class="form-select"
                     (change)="onSortChange()">
-                    <option value="">Seleccionar</option>
-                    <option value="destinoPrincipal">Destino</option>
-                    <option value="fechaInicio">Más próximos</option>
+                    <option value="">Más recientes</option>
+                    <option value="destinoPrincipal">Destino (A-Z)</option>
+                    <option value="fechaInicio">Fecha más cercana</option>
                   </select>
                 </div>
               </div>
-              <div class="text-center">
+
+              <!-- Filtros activos badges -->
+              @if (hayFiltrosActivos) {
+                <div class="mb-3">
+                  <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <span class="text-muted small">Filtros activos:</span>
+                    @if (searchForm.value.destinoPrincipal) {
+                      <span class="badge bg-primary">
+                        <i class="bi bi-geo-alt-fill me-1"></i>{{ searchForm.value.destinoPrincipal }}
+                      </span>
+                    }
+                    @if (searchForm.value.fechaInicio) {
+                      <span class="badge bg-success">
+                        <i class="bi bi-calendar-check me-1"></i>Desde: {{ searchForm.value.fechaInicio }}
+                      </span>
+                    }
+                    @if (searchForm.value.fechaFin) {
+                      <span class="badge bg-danger">
+                        <i class="bi bi-calendar-x me-1"></i>Hasta: {{ searchForm.value.fechaFin }}
+                      </span>
+                    }
+                    @if (searchForm.value.sort) {
+                      <span class="badge bg-info">
+                        <i class="bi bi-sort-down me-1"></i>
+                        @if (searchForm.value.sort === 'destinoPrincipal') { Ordenado por destino }
+                        @if (searchForm.value.sort === 'fechaInicio') { Ordenado por fecha }
+                      </span>
+                    }
+                  </div>
+                </div>
+              }
+
+              <div class="d-flex justify-content-center gap-2">
                 <button type="submit" class="btn btn-primary btn-lg px-5" [disabled]="loading">
                   @if (loading) {
                     <span class="spinner-border spinner-border-sm me-2"></span>
@@ -75,6 +118,11 @@
                   }
                   Buscar Grupos
                 </button>
+                @if (hayFiltrosActivos) {
+                  <button type="button" class="btn btn-outline-secondary btn-lg" (click)="limpiarFiltros()">
+                    <i class="bi bi-x-circle me-2"></i>Limpiar filtros
+                  </button>
+                }
               </div>
             </form>
             @if (error) {
@@ -91,9 +139,15 @@
     <div class="mb-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h3 class="fw-semibold mb-1">Resultados de búsqueda</h3>
-          <p class="text-muted">
-            Se encontraron {{ grupos.length }} grupos que coinciden con tu búsqueda
+          <h3 class="fw-semibold mb-1">
+            <i class="bi bi-list-ul text-primary me-2"></i>Grupos disponibles
+          </h3>
+          <p class="text-muted mb-0">
+            <i class="bi bi-check-circle-fill text-success me-1"></i>
+            {{ totalElements }} grupos encontrados
+            @if (hayFiltrosActivos) {
+              <span class="text-primary">con los filtros aplicados</span>
+            }
           </p>
         </div>
       </div>
