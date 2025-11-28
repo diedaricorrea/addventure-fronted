@@ -21,7 +21,11 @@ export interface CrearGrupoDTO {
 
 export interface DiaItinerario {
   diaNumero: number;
-  actividades: string[];
+  titulo: string;
+  descripcion?: string;
+  puntoPartida?: string;
+  puntoLlegada?: string;
+  duracionEstimada?: string;
 }
 
 @Injectable({

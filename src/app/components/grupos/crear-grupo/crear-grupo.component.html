@@ -1,288 +1,457 @@
 <app-navbar></app-navbar>
 
-<div class="container-crear-grupo">
-  <div class="header-crear">
-    <h1>{{ esEdicion ? 'Editar Grupo' : 'Crear Nuevo Grupo' }}</h1>
-    <p>{{ esEdicion ? 'Modifica los detalles de tu viaje' : 'Planifica tu próxima aventura' }}</p>
+<!-- Main Content -->
+<main class="container py-4 py-md-5">
+  <a [routerLink]="['/grupos']" class="back-link">
+    <i class="bi bi-arrow-left me-2"></i>
+    Volver
+  </a>
+  <div class="mb-4">
+    <h1 class="fw-bold mb-2">{{ esEdicion ? 'Editar Grupo de Viaje' : 'Crea un Nuevo Grupo de Viaje' }}</h1>
+    <p class="text-secondary">
+      Comparte tus planes de viaje y encuentra compañeros con intereses similares para vivir una experiencia única.
+    </p>
   </div>
 
-  <form [formGroup]="grupoForm" (ngSubmit)="onSubmit()" class="form-crear-grupo">
-    
-    <!-- Información Básica -->
-    <div class="seccion-form">
-      <h2><i class="fas fa-info-circle"></i> Información Básica</h2>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label for="nombreViaje">Nombre del Viaje *</label>
-          <input 
-            type="text" 
-            id="nombreViaje" 
-            formControlName="nombreViaje"
-            [class.is-invalid]="isFieldInvalid('nombreViaje')"
-            placeholder="Ej: Aventura por los Andes"
-          />
-          @if (isFieldInvalid('nombreViaje')) {
-            <div class="error-message">
-              {{ getFieldError('nombreViaje') }}
-            </div>
-          }
-        </div>
-
-        <div class="form-group">
-          <label for="destinoPrincipal">Destino Principal *</label>
-          <input 
-            type="text" 
-            id="destinoPrincipal" 
-            formControlName="destinoPrincipal"
-            [class.is-invalid]="isFieldInvalid('destinoPrincipal')"
-            placeholder="Ej: Cusco, Perú"
-          />
-          @if (isFieldInvalid('destinoPrincipal')) {
-            <div class="error-message">
-              {{ getFieldError('destinoPrincipal') }}
-            </div>
-          }
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="fechaInicio">Fecha de Inicio *</label>
-          <input 
-            type="date" 
-            id="fechaInicio" 
-            formControlName="fechaInicio"
-            [class.is-invalid]="isFieldInvalid('fechaInicio')"
-          />
-          @if (isFieldInvalid('fechaInicio')) {
-            <div class="error-message">
-              {{ getFieldError('fechaInicio') }}
-            </div>
-          }
-        </div>
-
-        <div class="form-group">
-          <label for="fechaFin">Fecha de Fin *</label>
-          <input 
-            type="date" 
-            id="fechaFin" 
-            formControlName="fechaFin"
-            [class.is-invalid]="isFieldInvalid('fechaFin')"
-          />
-          @if (isFieldInvalid('fechaFin')) {
-            <div class="error-message">
-              {{ getFieldError('fechaFin') }}
-            </div>
-          }
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="descripcion">Descripción del Viaje *</label>
-        <textarea 
-          id="descripcion" 
-          formControlName="descripcion"
-          [class.is-invalid]="isFieldInvalid('descripcion')"
-          rows="4"
-          placeholder="Describe tu aventura..."
-        ></textarea>
-        @if (isFieldInvalid('descripcion')) {
-          <div class="error-message">
-            {{ getFieldError('descripcion') }}
-          </div>
-        }
-      </div>
-
-      <div class="form-group">
-        <label for="puntoEncuentro">Punto de Encuentro *</label>
-        <input 
-          type="text" 
-          id="puntoEncuentro" 
-          formControlName="puntoEncuentro"
-          [class.is-invalid]="isFieldInvalid('puntoEncuentro')"
-          placeholder="Ej: Plaza de Armas, Cusco"
-        />
-        @if (isFieldInvalid('puntoEncuentro')) {
-          <div class="error-message">
-            {{ getFieldError('puntoEncuentro') }}
-          </div>
-        }
-      </div>
-
-      <div class="form-group">
-        <label for="imagenDestacada">URL de Imagen Destacada (opcional)</label>
-        <input 
-          type="url" 
-          id="imagenDestacada" 
-          formControlName="imagenDestacada"
-          [class.is-invalid]="isFieldInvalid('imagenDestacada')"
-          placeholder="https://..."
-        />
-        @if (isFieldInvalid('imagenDestacada')) {
-          <div class="error-message">
-            {{ getFieldError('imagenDestacada') }}
-          </div>
-        }
-      </div>
+  <div class="card mx-auto" style="max-width: 900px;">
+    <div class="card-header">
+      <h5 class="card-title mb-0">Información del Viaje</h5>
     </div>
+    <div class="card-body p-4">
+      <!-- Tabs -->
+      <ul class="nav nav-tabs mb-4" id="createGroupTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            [class.active]="currentTab === 'info'"
+            (click)="switchTab('info')"
+            type="button"
+            role="tab"
+            id="info-tab">
+            Información básica
+            <i class="tab-icon ms-2" [ngClass]="getTabIcon('info')"></i>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            [class.active]="currentTab === 'location'"
+            [class.disabled]="!tabValidation.info && !esEdicion"
+            (click)="switchTab('location')"
+            type="button"
+            role="tab"
+            id="location-tab">
+            Punto de encuentro
+            <i class="tab-icon ms-2" [ngClass]="getTabIcon('location')"></i>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            [class.active]="currentTab === 'itinerary'"
+            [class.disabled]="(!tabValidation.info || !tabValidation.location) && !esEdicion"
+            (click)="switchTab('itinerary')"
+            type="button"
+            role="tab"
+            id="itinerary-tab">
+            Itinerario
+            <i class="tab-icon ms-2" [ngClass]="getTabIcon('itinerary')"></i>
+          </button>
+        </li>
+      </ul>
 
-    <!-- Configuración del Grupo -->
-    <div class="seccion-form">
-      <h2><i class="fas fa-users"></i> Configuración del Grupo</h2>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label for="maxParticipantes">Máximo de Participantes *</label>
-          <input 
-            type="number" 
-            id="maxParticipantes" 
-            formControlName="maxParticipantes"
-            [class.is-invalid]="isFieldInvalid('maxParticipantes')"
-            min="2"
-            max="20"
-          />
-          @if (isFieldInvalid('maxParticipantes')) {
-            <div class="error-message">
-              {{ getFieldError('maxParticipantes') }}
-            </div>
-          }
-        </div>
-
-        <div class="form-group">
-          <label for="rangoEdadMin">Edad Mínima *</label>
-          <input 
-            type="number" 
-            id="rangoEdadMin" 
-            formControlName="rangoEdadMin"
-            [class.is-invalid]="isFieldInvalid('rangoEdadMin')"
-            min="18"
-            max="80"
-          />
-          @if (isFieldInvalid('rangoEdadMin')) {
-            <div class="error-message">
-              {{ getFieldError('rangoEdadMin') }}
-            </div>
-          }
-        </div>
-
-        <div class="form-group">
-          <label for="rangoEdadMax">Edad Máxima *</label>
-          <input 
-            type="number" 
-            id="rangoEdadMax" 
-            formControlName="rangoEdadMax"
-            [class.is-invalid]="isFieldInvalid('rangoEdadMax')"
-            min="18"
-            max="80"
-          />
-          @if (isFieldInvalid('rangoEdadMax')) {
-            <div class="error-message">
-              {{ getFieldError('rangoEdadMax') }}
-            </div>
-          }
-        </div>
-      </div>
-    </div>
-
-    <!-- Etiquetas -->
-    <div class="seccion-form">
-      <h2><i class="fas fa-tags"></i> Etiquetas *</h2>
-      
-      <div class="etiquetas-input-group">
-        <input 
-          type="text" 
-          id="etiquetasInput" 
-          formControlName="etiquetasInput"
-          placeholder="Ej: Aventura, Naturaleza, Camping..."
-          (keyup.enter)="agregarEtiqueta()"
-        />
-        <button type="button" class="btn-agregar-etiqueta" (click)="agregarEtiqueta()">
-          <i class="fas fa-plus"></i> Agregar
-        </button>
-      </div>
-
-      @if (etiquetas.length > 0) {
-        <div class="etiquetas-lista">
-          @for (etiqueta of etiquetas.controls; track $index) {
-            <span class="etiqueta">
-              {{ etiqueta.value }}
-              <button type="button" class="btn-eliminar-etiqueta" (click)="eliminarEtiqueta($index)">
-                <i class="fas fa-times"></i>
-              </button>
-            </span>
-          }
-        </div>
-      }
-
-      <p class="helper-text">Has agregado {{ etiquetas.length }}/10 etiquetas</p>
-    </div>
-
-    <!-- Itinerario (Opcional) -->
-    <div class="seccion-form">
-      <h2><i class="fas fa-calendar-alt"></i> Itinerario (Opcional)</h2>
-      
-      @if (diasItinerario.length === 0) {
-        <div class="empty-state">
-          <p>No has agregado días al itinerario</p>
-        </div>
-      }
-
-      @for (dia of diasItinerario.controls; track $index) {
-        <div class="dia-itinerario">
-          <div class="dia-header">
-            <h3>Día {{ getActividades($index).parent?.get('diaNumero')?.value || ($index + 1) }}</h3>
-            <button type="button" class="btn-eliminar-dia" (click)="eliminarDia($index)">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-
-          <div>
-            @for (actividad of getActividades($index).controls; track $index; let j = $index) {
-              <div class="actividad-item">
-                <input 
-                  type="text" 
-                  [value]="actividad.value"
-                  (input)="getActividades($index).at(j).setValue($any($event.target).value)"
-                  placeholder="Actividad del día..."
+      <form [formGroup]="grupoForm" (ngSubmit)="onSubmit()" class="needs-validation" novalidate>
+        <div class="tab-content" id="createGroupTabContent">
+          <!-- Tab 1: Información básica -->
+          @if (currentTab === 'info') {
+            <div class="tab-pane fade show active slide-in" role="tabpanel">
+              <div class="mb-3">
+                <label for="nombreViaje" class="form-label fw-medium">Nombre del viaje *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="nombreViaje"
+                  formControlName="nombreViaje"
+                  placeholder="Ej: Aventura en Machu Picchu"
+                  [class.is-invalid]="isFieldInvalid('nombreViaje')"
                 />
-                @if (getActividades($index).length > 1) {
-                  <button 
-                    type="button" 
-                    class="btn-eliminar-actividad" 
-                    (click)="eliminarActividad($index, j)"
-                  >
-                    <i class="fas fa-times"></i>
-                  </button>
+                @if (isFieldInvalid('nombreViaje')) {
+                  <div class="invalid-feedback d-block">
+                    {{ getFieldError('nombreViaje') }}
+                  </div>
                 }
               </div>
-            }
-          </div>
 
-          <button type="button" class="btn-agregar-actividad" (click)="agregarActividad($index)">
-            <i class="fas fa-plus"></i> Agregar Actividad
-          </button>
+              <div class="row mb-3">
+                <div class="col-md-12 mb-3 mb-md-0">
+                  <label for="destinoPrincipal" class="form-label fw-medium">
+                    <i class="bi bi-geo-alt me-1"></i> Destino principal *
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="destinoPrincipal"
+                    formControlName="destinoPrincipal"
+                    placeholder="Ej: Cusco, Perú"
+                    [class.is-invalid]="isFieldInvalid('destinoPrincipal')"
+                  />
+                  @if (isFieldInvalid('destinoPrincipal')) {
+                    <div class="invalid-feedback d-block">
+                      {{ getFieldError('destinoPrincipal') }}
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-6 mb-3 mb-md-0">
+                  <label for="fechaInicio" class="form-label fw-medium">
+                    <i class="bi bi-calendar me-1"></i> Fecha de inicio *
+                  </label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="fechaInicio"
+                    formControlName="fechaInicio"
+                    [min]="minFechaInicio"
+                    [class.is-invalid]="isFieldInvalid('fechaInicio')"
+                    (change)="onFechaChange()"
+                  />
+                  @if (isFieldInvalid('fechaInicio')) {
+                    <div class="invalid-feedback d-block">
+                      {{ getFieldError('fechaInicio') }}
+                    </div>
+                  }
+                </div>
+                <div class="col-md-6">
+                  <label for="fechaFin" class="form-label fw-medium">Fecha de fin *</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="fechaFin"
+                    formControlName="fechaFin"
+                    [min]="minFechaFin"
+                    [class.is-invalid]="isFieldInvalid('fechaFin')"
+                    (change)="onFechaChange()"
+                  />
+                  @if (isFieldInvalid('fechaFin')) {
+                    <div class="invalid-feedback d-block">
+                      {{ getFieldError('fechaFin') }}
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="participantes" class="form-label fw-medium">
+                  <i class="bi bi-people me-1"></i> Número máximo de participantes *
+                </label>
+                <select class="form-select" id="participantes" formControlName="maxParticipantes" [class.is-invalid]="isFieldInvalid('maxParticipantes')">
+                  <option value="">Selecciona</option>
+                  <option value="2">2 personas</option>
+                  <option value="4">4 personas</option>
+                  <option value="6">6 personas</option>
+                  <option value="8">8 personas</option>
+                  <option value="10">10 personas</option>
+                  <option value="12">12 personas</option>
+                  <option value="15">15 personas</option>
+                  <option value="20">20 personas</option>
+                </select>
+                @if (isFieldInvalid('maxParticipantes')) {
+                  <div class="invalid-feedback d-block">
+                    {{ getFieldError('maxParticipantes') }}
+                  </div>
+                }
+              </div>
+
+              <div class="mb-3">
+                <label for="rango-edad" class="form-label fw-medium">Rango de edad de los viajeros</label>
+                <div class="row">
+                  <div class="col-md-6 mb-2 mb-md-0">
+                    <label for="rangoEdadMin" class="form-label small">Edad mínima</label>
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="rangoEdadMin"
+                        formControlName="rangoEdadMin"
+                        min="18"
+                        max="80"
+                        (input)="onEdadChange()"
+                      />
+                      <span class="input-group-text">años</span>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="rangoEdadMax" class="form-label small">Edad máxima</label>
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="rangoEdadMax"
+                        formControlName="rangoEdadMax"
+                        min="18"
+                        max="80"
+                        (input)="onEdadChange()"
+                      />
+                      <span class="input-group-text">años</span>
+                    </div>
+                  </div>
+                </div>
+                <small class="text-secondary mt-2 d-block">
+                  <i class="bi bi-info-circle me-1"></i>
+                  Buscamos viajeros entre <span id="edad-min-display">{{ grupoForm.value.rangoEdadMin || 18 }}</span> y
+                  <span id="edad-max-display">{{ grupoForm.value.rangoEdadMax || 60 }}</span> años para este grupo
+                </small>
+              </div>
+
+              <div class="mb-3">
+                <label for="etiquetas" class="form-label fw-medium">Etiquetas (hashtags) *</label>
+                <input
+                  type="text"
+                  class="form-control mb-2"
+                  id="etiquetas"
+                  formControlName="etiquetasInput"
+                  placeholder="Añade etiquetas presionando Enter (ej: #trekking, #playa, #aventura)"
+                  (keypress)="onEtiquetaKeyPress($event)"
+                  (blur)="onEtiquetaBlur()"
+                />
+                <div id="tags-container" class="d-flex flex-wrap gap-2 mb-2">
+                  @for (etiqueta of tags; track $index) {
+                    <span class="badge bg-primary text-white me-1 mb-1">
+                      {{ etiqueta }}
+                      <i class="bi bi-x-circle ms-1" style="cursor: pointer;" (click)="removeTag(etiqueta)"></i>
+                    </span>
+                  }
+                </div>
+                <small class="text-muted">
+                  <i class="bi bi-info-circle me-1"></i>
+                  Agrega al menos una etiqueta. Máximo 10 etiquetas de 20 caracteres cada una.
+                </small>
+                @if (tags.length === 0 && submitted) {
+                  <div class="invalid-feedback d-block">
+                    Debes agregar al menos una etiqueta
+                  </div>
+                }
+              </div>
+
+              <div class="mb-3">
+                <label for="descripcion" class="form-label fw-medium">Descripción del viaje *</label>
+                <textarea
+                  class="form-control"
+                  id="descripcion"
+                  formControlName="descripcion"
+                  rows="4"
+                  placeholder="Describe los detalles del viaje, actividades planeadas, qué tipo de viajeros buscas, etc."
+                  [class.is-invalid]="isFieldInvalid('descripcion')"
+                ></textarea>
+                @if (isFieldInvalid('descripcion')) {
+                  <div class="invalid-feedback d-block">
+                    {{ getFieldError('descripcion') }}
+                  </div>
+                }
+              </div>
+
+              <div class="mb-3">
+                <label for="imagenDestacada" class="form-label fw-medium">
+                  <i class="bi bi-upload me-1"></i> Imagen destacada (URL)
+                </label>
+                <input
+                  type="url"
+                  class="form-control"
+                  id="imagenDestacada"
+                  formControlName="imagenDestacada"
+                  placeholder="https://ejemplo.com/imagen.jpg"
+                  [class.is-invalid]="isFieldInvalid('imagenDestacada')"
+                />
+                <small class="text-muted">
+                  <i class="bi bi-info-circle me-1"></i>
+                  Opcional. Debe ser una URL válida que comience con http:// o https://
+                </small>
+                @if (isFieldInvalid('imagenDestacada')) {
+                  <div class="invalid-feedback d-block">
+                    {{ getFieldError('imagenDestacada') }}
+                  </div>
+                }
+              </div>
+
+              <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-primary" (click)="goToLocation()">
+                  Continuar <i class="bi bi-chevron-down ms-1"></i>
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- Tab 2: Punto de encuentro -->
+          @if (currentTab === 'location') {
+            <div class="tab-pane fade show active slide-in" role="tabpanel">
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <label for="puntoEncuentro" class="form-label fw-medium">Punto de encuentro *</label>
+                  <span class="badge bg-info text-white">
+                    <i class="bi bi-info-circle me-1"></i> Importante para los participantes
+                  </span>
+                </div>
+                <textarea
+                  class="form-control"
+                  id="puntoEncuentro"
+                  formControlName="puntoEncuentro"
+                  rows="3"
+                  placeholder="Describe el punto de encuentro con detalles (dirección, referencias, etc.)"
+                  [class.is-invalid]="isFieldInvalid('puntoEncuentro')"
+                ></textarea>
+                @if (isFieldInvalid('puntoEncuentro')) {
+                  <div class="invalid-feedback d-block">
+                    {{ getFieldError('puntoEncuentro') }}
+                  </div>
+                }
+              </div>
+
+              <div class="alert alert-info mb-4">
+                <h6 class="fw-medium mb-2">
+                  <i class="bi bi-info-circle me-1"></i>
+                  ¿Por qué es importante el punto de encuentro?
+                </h6>
+                <p class="small mb-0">
+                  El punto de encuentro es donde todos los participantes se reunirán al inicio del viaje. Elige un lugar
+                  fácil de encontrar y accesible para todos, como un aeropuerto, una plaza principal o un hotel conocido.
+                </p>
+              </div>
+
+              <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary" (click)="switchTab('info')">
+                  <i class="bi bi-chevron-up me-1"></i> Anterior
+                </button>
+                <button type="button" class="btn btn-primary" (click)="goToItinerary()">
+                  Continuar <i class="bi bi-chevron-down ms-1"></i>
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- Tab 3: Itinerario -->
+          @if (currentTab === 'itinerary') {
+            <div class="tab-pane fade show active slide-in" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-medium">Itinerario del viaje</h5>
+                <span class="badge bg-primary">{{ tripDays }} días de viaje</span>
+              </div>
+
+              <div id="itinerary-content">
+                @if (!showItinerary) {
+                  <div class="alert alert-warning">
+                    <p class="d-flex align-items-center mb-0">
+                      <i class="bi bi-info-circle me-2"></i>
+                      Selecciona las fechas de inicio y fin en la sección de información básica para generar el itinerario.
+                    </p>
+                  </div>
+                } @else {
+                  <div class="alert alert-info mb-4">
+                    <p class="small mb-0">
+                      Describe las actividades planeadas para cada día del viaje. Esto ayudará a los potenciales
+                      participantes a entender mejor la experiencia que vivirán.
+                    </p>
+                  </div>
+
+                  <div class="accordion" id="itineraryAccordion">
+                    @for (dia of itineraryDays; track dia.numero) {
+                      <div class="accordion-item">
+                        <h2 class="accordion-header">
+                          <button
+                            class="accordion-button"
+                            [class.collapsed]="dia.numero !== 1"
+                            type="button"
+                            [attr.data-bs-toggle]="'collapse'"
+                            [attr.data-bs-target]="'#collapse' + dia.numero"
+                            [attr.aria-expanded]="dia.numero === 1"
+                            [attr.aria-controls]="'collapse' + dia.numero">
+                            Día {{ dia.numero }} - {{ dia.fecha }}
+                          </button>
+                        </h2>
+                        <div
+                          [id]="'collapse' + dia.numero"
+                          class="accordion-collapse collapse"
+                          [class.show]="dia.numero === 1"
+                          [attr.data-bs-parent]="'#itineraryAccordion'">
+                          <div class="accordion-body">
+                            <div class="mb-3">
+                              <label class="form-label small fw-medium">Título del día</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                [(ngModel)]="dia.titulo"
+                                [ngModelOptions]="{standalone: true}"
+                                placeholder="Ej: Llegada a Cusco"
+                              />
+                            </div>
+                            <div class="mb-3">
+                              <label class="form-label small fw-medium">Descripción</label>
+                              <textarea
+                                class="form-control"
+                                rows="2"
+                                [(ngModel)]="dia.descripcion"
+                                [ngModelOptions]="{standalone: true}"
+                                placeholder="Describe las actividades del día"
+                              ></textarea>
+                            </div>
+                            <div class="row mb-3">
+                              <div class="col-md-6">
+                                <label class="form-label small fw-medium">Punto de partida</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  [(ngModel)]="dia.puntoPartida"
+                                  [ngModelOptions]="{standalone: true}"
+                                  placeholder="Ej: Hotel en Cusco"
+                                />
+                              </div>
+                              <div class="col-md-6">
+                                <label class="form-label small fw-medium">Punto de llegada</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  [(ngModel)]="dia.puntoLlegada"
+                                  [ngModelOptions]="{standalone: true}"
+                                  placeholder="Ej: Machu Picchu"
+                                />
+                              </div>
+                            </div>
+                            <div class="mb-3">
+                              <label class="form-label small fw-medium">Duración estimada</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                [(ngModel)]="dia.duracionEstimada"
+                                [ngModelOptions]="{standalone: true}"
+                                placeholder="Ej: 8 horas"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="d-flex justify-content-between mt-4">
+                <button type="button" class="btn btn-outline-secondary" (click)="switchTab('location')">
+                  <i class="bi bi-chevron-up me-1"></i> Anterior
+                </button>
+                <button type="submit" class="btn btn-primary" [disabled]="loading">
+                  @if (loading) {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                  } @else {
+                    <i class="bi bi-plus-lg me-1"></i>
+                  }
+                  {{ loading ? 'Guardando...' : (esEdicion ? 'Actualizar Grupo' : 'Crear Grupo') }}
+                </button>
+              </div>
+            </div>
+          }
         </div>
-      }
-
-      <button type="button" class="btn-agregar-dia" (click)="agregarDia()">
-        <i class="fas fa-plus-circle"></i> Agregar Día
-      </button>
+      </form>
     </div>
-
-    <!-- Botones de Acción -->
-    <div class="form-actions">
-      <button type="button" class="btn-cancelar" (click)="cancelar()" [disabled]="loading">
-        Cancelar
-      </button>
-      <button type="submit" class="btn-guardar" [disabled]="loading">
-        @if (loading) {
-          <i class="fas fa-spinner fa-spin"></i>
-        } @else {
-          <i class="fas fa-save"></i>
-        }
-        {{ loading ? 'Guardando...' : (esEdicion ? 'Actualizar Grupo' : 'Crear Grupo') }}
-      </button>
-    </div>
-  </form>
-</div>
+  </div>
+</main>
