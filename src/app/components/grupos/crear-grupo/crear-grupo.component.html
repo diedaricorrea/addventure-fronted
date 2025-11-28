@@ -290,15 +290,48 @@
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <label for="puntoEncuentro" class="form-label fw-medium">Punto de encuentro *</label>
                   <span class="badge bg-info text-white">
-                    <i class="bi bi-info-circle me-1"></i> Importante para los participantes
+                    <i class="bi bi-geo-alt-fill me-1"></i> Buscar en el mapa
                   </span>
                 </div>
+
+                <!-- Input de búsqueda con autocompletado -->
+                <div class="input-group mb-3">
+                  <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                  </span>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="searchPlace"
+                    placeholder="Buscar lugar (ej: Aeropuerto El Dorado, Bogotá)"
+                    #searchInput
+                    (keypress)="onSearchKeyPress($event)"
+                  />
+                  <button class="btn btn-primary" type="button" (click)="searchLocation()">
+                    <i class="bi bi-search"></i> Buscar
+                  </button>
+                </div>
+
+                <!-- Mapa de OpenStreetMap -->
+                <div id="map" class="mb-3" style="height: 350px; border-radius: 8px; border: 2px solid #dee2e6;"></div>
+
+                <!-- Información de coordenadas -->
+                @if (selectedCoordinates) {
+                  <div class="alert alert-success mb-3">
+                    <i class="bi bi-check-circle me-1"></i>
+                    <strong>Ubicación seleccionada:</strong>
+                    Lat: {{ selectedCoordinates.lat.toFixed(6) }},
+                    Lng: {{ selectedCoordinates.lng.toFixed(6) }}
+                  </div>
+                }
+
+                <!-- Textarea con la información del punto de encuentro -->
                 <textarea
                   class="form-control"
                   id="puntoEncuentro"
                   formControlName="puntoEncuentro"
                   rows="3"
-                  placeholder="Describe el punto de encuentro con detalles (dirección, referencias, etc.)"
+                  placeholder="El punto de encuentro se completará automáticamente al seleccionar en el mapa, o puedes escribirlo manualmente"
                   [class.is-invalid]="isFieldInvalid('puntoEncuentro')"
                 ></textarea>
                 @if (isFieldInvalid('puntoEncuentro')) {
@@ -311,11 +344,12 @@
               <div class="alert alert-info mb-4">
                 <h6 class="fw-medium mb-2">
                   <i class="bi bi-info-circle me-1"></i>
-                  ¿Por qué es importante el punto de encuentro?
+                  ¿Cómo funciona?
                 </h6>
                 <p class="small mb-0">
-                  El punto de encuentro es donde todos los participantes se reunirán al inicio del viaje. Elige un lugar
-                  fácil de encontrar y accesible para todos, como un aeropuerto, una plaza principal o un hotel conocido.
+                  <strong>1.</strong> Busca el lugar en el campo de búsqueda o escribe directamente<br>
+                  <strong>2.</strong> Haz clic en el mapa para seleccionar la ubicación exacta<br>
+                  <strong>3.</strong> La dirección se agregará automáticamente, puedes editarla si lo deseas
                 </p>
               </div>
 

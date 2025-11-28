@@ -1,10 +1,12 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { GruposService } from '../../../services/grupos.service';
 import { ToastService } from '../../../services/toast.service';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
+
+declare var L: any;
 
 interface DiaItinerario {
   numero: number;
@@ -24,7 +26,9 @@ interface DiaItinerario {
   templateUrl: './crear-grupo.component.html',
   styleUrls: ['./crear-grupo.component.css']
 })
-export class CrearGrupoComponent implements OnInit {
+export class CrearGrupoComponent implements OnInit, AfterViewInit {
+  @ViewChild('searchInput') searchInput!: ElementRef;
+
   grupoForm!: FormGroup;
   esEdicion = false;
   idGrupo?: number;
@@ -51,6 +55,11 @@ export class CrearGrupoComponent implements OnInit {
   minFechaInicio: string = '';
   minFechaFin: string = '';
 
+  // Leaflet Map
+  map: any;
+  marker: any;
+  selectedCoordinates: { lat: number; lng: number } | null = null;
+
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -73,6 +82,15 @@ export class CrearGrupoComponent implements OnInit {
         this.cargarGrupo();
       }
     });
+  }
+
+  ngAfterViewInit(): void {
+    // Inicializar Google Maps cuando se cambia a la pestaña de ubicación
+    setTimeout(() => {
+      if (this.currentTab === 'location' || this.esEdicion) {
+        this.initializeMap();
+      }
+    }, 100);
   }
 
   inicializarFormulario(): void {
@@ -170,6 +188,8 @@ export class CrearGrupoComponent implements OnInit {
     if (this.esEdicion || this.validateInfoTab()) {
       this.tabValidation.info = true;
       this.currentTab = 'location';
+      // Inicializar mapa cuando se cambia a la pestaña de ubicación
+      setTimeout(() => this.initializeMap(), 100);
     }
   }
 
@@ -536,5 +556,125 @@ export class CrearGrupoComponent implements OnInit {
       if (control.errors['fechaFinAnterior']) return 'La fecha de fin debe ser igual o posterior a la fecha de inicio';
     }
     return '';
+  }
+
+  // Google Maps
+  initializeMap(): void {
+    if (typeof L === 'undefined') {
+      console.error('Leaflet no está cargado');
+      return;
+    }
+
+    // Verificar si el mapa ya está inicializado
+    if (this.map) {
+      return;
+    }
+
+    const mapElement = document.getElementById('map');
+    if (!mapElement) {
+      return;
+    }
+
+    // Coordenadas por defecto (Bogotá, Colombia)
+    const defaultLocation: [number, number] = [4.7110, -74.0721];
+
+    // Crear el mapa con Leaflet
+    this.map = L.map('map').setView(defaultLocation, 12);
+
+    // Añadir capa de OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(this.map);
+
+    // Crear marcador
+    this.marker = L.marker(defaultLocation, {
+      draggable: true
+    }).addTo(this.map);
+
+    // Evento de clic en el mapa
+    this.map.on('click', (e: any) => {
+      this.placeMarkerAndUpdateAddress(e.latlng);
+    });
+
+    // Evento cuando se arrastra el marcador
+    this.marker.on('dragend', (e: any) => {
+      this.placeMarkerAndUpdateAddress(e.target.getLatLng());
+    });
+  }
+
+  placeMarkerAndUpdateAddress(latlng: any): void {
+    this.marker.setLatLng(latlng);
+    this.map.panTo(latlng);
+
+    // Guardar coordenadas
+    this.selectedCoordinates = {
+      lat: latlng.lat,
+      lng: latlng.lng
+    };
+
+    // Usar Nominatim (OpenStreetMap) para geocodificación inversa
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}&zoom=18&addressdetails=1`;
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        if (data.display_name) {
+          const address = data.display_name;
+          this.grupoForm.patchValue({ puntoEncuentro: address });
+        } else {
+          this.grupoForm.patchValue({
+            puntoEncuentro: `Ubicación: ${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error en geocodificación:', error);
+        this.grupoForm.patchValue({
+          puntoEncuentro: `Ubicación: ${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`
+        });
+      });
+  }
+
+  searchLocation(): void {
+    const searchTerm = this.searchInput?.nativeElement?.value;
+
+    if (!searchTerm || searchTerm.trim() === '') {
+      this.toastService.warning('Por favor ingresa un lugar para buscar');
+      return;
+    }
+
+    // Usar Nominatim para búsqueda de lugares
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchTerm)}&limit=1`;
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.length > 0) {
+          const result = data[0];
+          const latlng = L.latLng(parseFloat(result.lat), parseFloat(result.lon));
+
+          // Centrar el mapa en el resultado
+          this.map.setView(latlng, 15);
+
+          // Mover el marcador
+          this.placeMarkerAndUpdateAddress(latlng);
+
+          this.toastService.success('Ubicación encontrada');
+        } else {
+          this.toastService.warning('No se encontró la ubicación. Intenta con otro término de búsqueda');
+        }
+      })
+      .catch(error => {
+        console.error('Error en búsqueda:', error);
+        this.toastService.error('Error al buscar la ubicación');
+      });
+  }
+
+  onSearchKeyPress(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.searchLocation();
+    }
   }
 }
